@@ -1,0 +1,14 @@
+services:
+  api:
+    image: node:20-bookworm
+    working_dir: /app
+    volumes:
+      - ./backend-node:/app
+    ports:
+      - "8000:8000"
+    command: sh -c "npm install && npm start"
+    environment:
+      PORT: 8000
+      JWT_SECRET: change-this-in-production
+      OLLAMA_URL: http://host.docker.internal:11434
+      OLLAMA_MODEL: llama3:latest

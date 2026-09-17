@@ -1,0 +1,16 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Kurdistan Tourism",
+      "request": "launch",
+      "type": "dart"
+    },
+    {
+      "name": "Kurdistan Tourism (API)",
+      "request": "launch",
+      "type": "dart",
+      "args": ["--dart-define=API_BASE_URL=http://10.0.2.2:8000/api"]
+    }
+  ]
+}

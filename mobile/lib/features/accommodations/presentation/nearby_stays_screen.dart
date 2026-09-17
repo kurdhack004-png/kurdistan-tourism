@@ -1,0 +1,60 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../bookings/presentation/booking_screen.dart';
+import '../providers/accommodations_provider.dart';
+
+class NearbyStaysScreen extends ConsumerWidget {
+  const NearbyStaysScreen({super.key, required this.lat, required this.lng});
+
+  final double lat;
+  final double lng;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final stays = ref.watch(nearbyAccommodationsProvider(NearbyAccommodationsParams(lat, lng)));
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('شوێنی مانەوەی نزیک')),
+      body: stays.when(
+        data: (items) {
+          if (items.isEmpty) {
+            return const Center(
+              child: Text('هیچ شوێنێکی مانەوە لە نزیک ئێرە تۆمار نەکراوە.',
+                  style: TextStyle(color: AppColors.riverstone)),
+            );
+          }
+          return ListView.builder(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            itemCount: items.length,
+            itemBuilder: (context, i) {
+              final a = items[i];
+              return Card(
+                margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+                child: ListTile(
+                  leading: const Icon(Icons.villa_outlined, color: AppColors.clay),
+                  title: Text(a.nameCkb),
+                  subtitle: Text('${a.type} • ${a.pricePerNight.toStringAsFixed(0)} د.ع/شەو'),
+                  trailing: FilledButton(
+                    onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => BookingScreen(
+                        accommodationId: a.id,
+                        accommodationName: a.nameCkb,
+                        pricePerNight: a.pricePerNight,
+                      ),
+                    )),
+                    child: const Text('حجزکردن'),
+                  ),
+                ),
+              );
+            },
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator(color: AppColors.saffron)),
+        error: (e, st) => Center(
+          child: Text('نەتوانرا شوێنی مانەوە بار بکرێن', style: Theme.of(context).textTheme.bodyMedium)),
+      ),
+    );
+  }
+}

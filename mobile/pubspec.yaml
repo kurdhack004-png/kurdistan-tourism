@@ -1,0 +1,32 @@
+name: kurdistan_tourism
+description: Kurdistan Tourism — offline-first travel companion app
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.7.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^2.5.1
+  dio: ^5.4.3                     # HTTP client
+  flutter_secure_storage: ^9.2.2  # secure token storage (not SharedPreferences)
+  shared_preferences: ^2.2.3      # small local flags + offline location cache (no codegen)
+  maplibre_gl: ^0.27.1            # open-source maps with offline tile support
+  geolocator: ^12.0.0             # GPS trail recording
+  easy_localization: ^3.0.8       # ckb/ar/en with RTL support
+  cached_network_image: ^3.3.1
+  url_launcher: ^6.3.0            # tel: links and opening the map app for directions
+  uuid: ^4.4.0                    # idempotency keys for payment requests
+  crypto: ^3.0.7                    # local demo-auth password hashing
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/i18n/
