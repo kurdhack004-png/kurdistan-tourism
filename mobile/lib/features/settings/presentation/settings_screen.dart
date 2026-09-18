@@ -65,8 +65,8 @@ class SettingsScreen extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
-          _SectionCard(
-            children: const [
+          const _SectionCard(
+            children: [
               ListTile(title: Text('مەرج و ڕێساکان')),
               ListTile(title: Text('پارێزگاری تایبەتێتی')),
               ListTile(title: Text('دەربارەی گەشتیاری کوردستان')),
