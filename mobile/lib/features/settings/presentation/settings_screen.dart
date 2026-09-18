@@ -18,54 +18,60 @@ class SettingsScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
-          _SectionCard(children: [
-            SwitchListTile(
-              value: settings.darkMode,
-              onChanged: notifier.setDarkMode,
-              title: const Text('دۆخی تاریک'),
-              secondary: const Icon(Icons.dark_mode_outlined),
-            ),
-            SwitchListTile(
-              value: settings.notificationsEnabled,
-              onChanged: notifier.setNotifications,
-              title: const Text('ئاگادارکردنەوەکان'),
-              secondary: const Icon(Icons.notifications_outlined),
-            ),
-            SwitchListTile(
-              value: settings.locationEnabled,
-              onChanged: notifier.setLocation,
-              title: const Text('خزمەتگوزاری شوێن (GPS)'),
-              secondary: const Icon(Icons.location_on_outlined),
-            ),
-          ]),
-          const SizedBox(height: AppSpacing.lg),
-          _SectionCard(children: [
-            ListTile(
-              leading: const Icon(Icons.language_outlined),
-              title: const Text('زمان'),
-              trailing: DropdownButton<String>(
-                value: settings.language,
-                underline: const SizedBox.shrink(),
-                items: const [
-                  DropdownMenuItem(value: 'ckb', child: Text('کوردی')),
-                  DropdownMenuItem(value: 'ar', child: Text('عەربی')),
-                  DropdownMenuItem(value: 'en', child: Text('English')),
-                ],
-                onChanged: (v) {
-                  if (v != null) {
-                    notifier.setLanguage(v);
-                    context.setLocale(Locale(v));
-                  }
-                },
+          _SectionCard(
+            children: [
+              SwitchListTile(
+                value: settings.darkMode,
+                onChanged: notifier.setDarkMode,
+                title: const Text('دۆخی تاریک'),
+                secondary: const Icon(Icons.dark_mode_outlined),
               ),
-            ),
-          ]),
+              SwitchListTile(
+                value: settings.notificationsEnabled,
+                onChanged: notifier.setNotifications,
+                title: const Text('ئاگادارکردنەوەکان'),
+                secondary: const Icon(Icons.notifications_outlined),
+              ),
+              SwitchListTile(
+                value: settings.locationEnabled,
+                onChanged: notifier.setLocation,
+                title: const Text('خزمەتگوزاری شوێن (GPS)'),
+                secondary: const Icon(Icons.location_on_outlined),
+              ),
+            ],
+          ),
           const SizedBox(height: AppSpacing.lg),
-          _SectionCard(children: const [
-            ListTile(title: Text('مەرج و ڕێساکان')),
-            ListTile(title: Text('پارێزگاری تایبەتێتی')),
-            ListTile(title: Text('دەربارەی گەشتیاری کوردستان')),
-          ]),
+          _SectionCard(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.language_outlined),
+                title: const Text('زمان'),
+                trailing: DropdownButton<String>(
+                  value: settings.language,
+                  underline: const SizedBox.shrink(),
+                  items: const [
+                    DropdownMenuItem(value: 'ckb', child: Text('کوردی')),
+                    DropdownMenuItem(value: 'ar', child: Text('عەربی')),
+                    DropdownMenuItem(value: 'en', child: Text('English')),
+                  ],
+                  onChanged: (v) {
+                    if (v != null) {
+                      notifier.setLanguage(v);
+                      context.setLocale(Locale(v));
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          _SectionCard(
+            children: const [
+              ListTile(title: Text('مەرج و ڕێساکان')),
+              ListTile(title: Text('پارێزگاری تایبەتێتی')),
+              ListTile(title: Text('دەربارەی گەشتیاری کوردستان')),
+            ],
+          ),
         ],
       ),
     );
@@ -74,6 +80,7 @@ class SettingsScreen extends ConsumerWidget {
 
 class _SectionCard extends StatelessWidget {
   const _SectionCard({required this.children});
+
   final List<Widget> children;
 
   @override
