@@ -98,7 +98,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
                             .hasMatch(email)
                         ? null
-                        : 'تکایە ئیمەی��ی دروست بنووسە';
+                        : 'تکایە ئیمەیلی دروست بنووسە';
                   },
                 ),
                 const SizedBox(height: AppSpacing.md),
