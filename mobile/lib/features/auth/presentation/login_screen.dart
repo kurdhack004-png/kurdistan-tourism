@@ -5,7 +5,6 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../shell/main_shell.dart';
 import '../providers/auth_provider.dart';
-import 'register_screen.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -31,9 +30,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     await ref.read(authProvider.notifier).login(
-          _emailCtrl.text.trim(),
-          _passCtrl.text,
-        );
+      _emailCtrl.text.trim(),
+      _passCtrl.text,
+    );
 
     if (!mounted) return;
     if (ref.read(authProvider).isAuthenticated) {
@@ -63,8 +62,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Icon(Icons.terrain_rounded,
-                        size: 48, color: AppColors.saffron),
+                    const Icon(Icons.terrain_rounded, size: 48, color: AppColors.saffron),
                     const SizedBox(height: AppSpacing.md),
                     const Text(
                       'چوونەژوورەوە',
@@ -82,8 +80,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       keyboardType: TextInputType.emailAddress,
                       validator: (value) {
                         final email = value?.trim() ?? '';
-                        return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
-                                .hasMatch(email)
+                        return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email)
                             ? null
                             : 'تکایە ئیمەیلی دروست بنووسە';
                       },
@@ -146,7 +143,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
             ),
           ),
-        )),
+        ),
       ),
     );
   }
