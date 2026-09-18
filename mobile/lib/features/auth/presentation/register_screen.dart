@@ -30,6 +30,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   }
 
   Future<void> _submit() async {
+    FocusManager.instance.primaryFocus?.unfocus();
     if (!_formKey.currentState!.validate()) return;
 
     await ref.read(authProvider.notifier).register(
@@ -39,9 +40,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         );
 
     if (!mounted) return;
-
-    final auth = ref.read(authProvider);
-    if (auth.isAuthenticated) {
+    if (ref.read(authProvider).isAuthenticated) {
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const MainShell()),
         (_) => false,
@@ -69,11 +68,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Icon(
-                  Icons.person_add_alt_1_rounded,
-                  size: 48,
-                  color: AppColors.saffron,
-                ),
+                const Icon(Icons.person_add_alt_1_rounded,
+                    size: 48, color: AppColors.saffron),
                 const SizedBox(height: AppSpacing.md),
                 const Text(
                   'هەژمارێکی نوێ دروست بکە',
@@ -85,7 +81,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xl),
-                _DarkField(
+                _Field(
                   controller: _nameCtrl,
                   hint: 'ناوی تەواو',
                   validator: (value) => value == null || value.trim().isEmpty
@@ -93,29 +89,29 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       : null,
                 ),
                 const SizedBox(height: AppSpacing.md),
-                _DarkField(
+                _Field(
                   controller: _emailCtrl,
                   hint: 'ئیمەیل',
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
                     final email = value?.trim() ?? '';
-                    if (email.isEmpty || !email.contains('@')) {
-                      return 'تکایە ئیمەیلی دروست بنووسە';
-                    }
-                    return null;
+                    return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
+                            .hasMatch(email)
+                        ? null
+                        : 'تکایە ئیمەی��ی دروست بنووسە';
                   },
                 ),
                 const SizedBox(height: AppSpacing.md),
-                _DarkField(
+                _Field(
                   controller: _passwordCtrl,
-                  hint: 'وشەی نهێنی (کەمتر نەبێت لە ١٠ پیت)',
+                  hint: 'وشەی نهێنی، لانیکەم ١٠ پیت',
                   obscure: true,
                   validator: (value) => (value?.length ?? 0) < 10
                       ? 'وشەی نهێنی دەبێت لانیکەم ١٠ پیت بێت'
                       : null,
                 ),
                 const SizedBox(height: AppSpacing.md),
-                _DarkField(
+                _Field(
                   controller: _confirmPasswordCtrl,
                   hint: 'دووبارەکردنەوەی وشەی نهێنی',
                   obscure: true,
@@ -158,8 +154,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   }
 }
 
-class _DarkField extends StatelessWidget {
-  const _DarkField({
+class _Field extends StatelessWidget {
+  const _Field({
     required this.controller,
     required this.hint,
     this.obscure = false,
