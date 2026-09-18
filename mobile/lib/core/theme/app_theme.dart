@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'app_colors.dart';
-import 'app_typography.dart';
-import 'app_spacing.dart';
 
 class AppTheme {
   static ThemeData get light => ThemeData(
@@ -44,16 +41,17 @@ class AppTheme {
         ),
         dividerTheme: const DividerThemeData(color: AppColors.divider, thickness: 0.5),
         switchTheme: SwitchThemeData(
-          thumbColor: MaterialStateProperty.resolveWith(
-            (states) => states.contains(MaterialState.selected) ? AppColors.saffron : null),
-          trackColor: MaterialStateProperty.resolveWith(
-            (states) => states.contains(MaterialState.selected) ? AppColors.saffron.withOpacity(0.4) : null),
+          thumbColor: WidgetStateProperty.resolveWith(
+            (states) => states.contains(WidgetState.selected) ? AppColors.saffron : null,
+          ),
+          trackColor: WidgetStateProperty.resolveWith(
+            (states) => states.contains(WidgetState.selected)
+                ? AppColors.saffron.withValues(alpha: 0.4)
+                : null,
+          ),
         ),
       );
 
-  /// Same brand identity, inverted for low-light viewing (a real user
-  /// need for an outdoor/hiking app used at dawn or after dusk) — not a
-  /// generic Material dark scheme swap.
   static ThemeData get dark => ThemeData(
         useMaterial3: true,
         brightness: Brightness.dark,
