@@ -39,6 +39,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         );
 
     if (!mounted) return;
+
     final auth = ref.read(authProvider);
     if (auth.isAuthenticated) {
       Navigator.of(context).pushAndRemoveUntil(
@@ -68,8 +69,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Icon(Icons.person_add_alt_1_rounded,
-                    size: 48, color: AppColors.saffron),
+                const Icon(
+                  Icons.person_add_alt_1_rounded,
+                  size: 48,
+                  color: AppColors.saffron,
+                ),
                 const SizedBox(height: AppSpacing.md),
                 const Text(
                   'هەژمارێکی نوێ دروست بکە',
@@ -127,7 +131,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       auth.error!,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
-                          color: Color(0xFFE38E7E), fontSize: 13),
+                        color: Color(0xFFE38E7E),
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                 FilledButton(
@@ -137,7 +143,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           width: 18,
                           height: 18,
                           child: CircularProgressIndicator(
-                              strokeWidth: 2, color: AppColors.inkDeep),
+                            strokeWidth: 2,
+                            color: AppColors.inkDeep,
+                          ),
                         )
                       : const Text('تۆمارکردن'),
                 ),
@@ -178,7 +186,7 @@ class _DarkField extends StatelessWidget {
         hintStyle: const TextStyle(color: AppColors.riverstone),
         errorStyle: const TextStyle(color: Color(0xFFE38E7E)),
         filled: true,
-        fillColor: Colors.white.withOpacity(0.06),
+        fillColor: Colors.white.withValues(alpha: 0.06),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSpacing.chipRadius),
           borderSide: BorderSide.none,
