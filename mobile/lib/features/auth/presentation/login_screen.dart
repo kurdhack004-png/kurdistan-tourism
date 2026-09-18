@@ -34,8 +34,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           _emailCtrl.text.trim(),
           _passCtrl.text,
         );
-    if (!mounted) return;
 
+    if (!mounted) return;
     if (ref.read(authProvider).isAuthenticated) {
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const MainShell()),
@@ -82,11 +82,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       keyboardType: TextInputType.emailAddress,
                       validator: (value) {
                         final email = value?.trim() ?? '';
-                        if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
-                            .hasMatch(email)) {
-                          return 'تکایە ئیمەیلی دروست بنووسە';
-                        }
-                        return null;
+                        return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
+                                .hasMatch(email)
+                            ? null
+                            : 'تکایە ئیمەیلی دروست بنووسە';
                       },
                     ),
                     const SizedBox(height: AppSpacing.md),
@@ -94,9 +93,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       controller: _passCtrl,
                       hint: 'وشەی نهێنی',
                       obscure: true,
-                      validator: (value) => (value?.isEmpty ?? true)
-                          ? 'تکایە وشەی نهێنی بنووسە'
-                          : null,
+                      validator: (value) =>
+                          (value == null || value.isEmpty)
+                              ? 'تکایە وشەی نهێنی بنووسە'
+                              : null,
                     ),
                     const SizedBox(height: AppSpacing.lg),
                     if (auth.error != null)
@@ -106,7 +106,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           auth.error!,
                           textAlign: TextAlign.center,
                           style: const TextStyle(
-                              color: Color(0xFFE38E7E), fontSize: 13),
+                            color: Color(0xFFE38E7E),
+                            fontSize: 13,
+                          ),
                         ),
                       ),
                     FilledButton(
@@ -116,7 +118,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               width: 18,
                               height: 18,
                               child: CircularProgressIndicator(
-                                  strokeWidth: 2, color: AppColors.inkDeep),
+                                strokeWidth: 2,
+                                color: AppColors.inkDeep,
+                              ),
                             )
                           : const Text('چوونەژوورەوە'),
                     ),
@@ -132,7 +136,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       child: const Text(
                         'هەژمارت نییە؟ خۆت تۆمار بکە',
                         style: TextStyle(
-                            color: AppColors.riverstone, fontSize: 13),
+                          color: AppColors.riverstone,
+                          fontSize: 13,
+                        ),
                       ),
                     ),
                   ],
@@ -140,7 +146,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
             ),
           ),
-        ),
+        )),
       ),
     );
   }
@@ -162,23 +168,24 @@ class _DarkField extends StatelessWidget {
   final String? Function(String?)? validator;
 
   @override
-  Widget build(BuildContext context) => TextFormField(
-        controller: controller,
-        obscureText: obscure,
-        keyboardType: keyboardType,
-        textInputAction: obscure ? TextInputAction.done : TextInputAction.next,
-        validator: validator,
-        style: const TextStyle(color: AppColors.limestoneWhite),
-        decoration: InputDecoration(
-          hintText: hint,
-          hintStyle: const TextStyle(color: AppColors.riverstone),
-          errorStyle: const TextStyle(color: Color(0xFFE38E7E)),
-          filled: true,
-          fillColor: Colors.white.withValues(alpha: 0.06),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppSpacing.chipRadius),
-            borderSide: BorderSide.none,
-          ),
+  Widget build(BuildContext context) {
+    return TextFormField(
+      controller: controller,
+      obscureText: obscure,
+      keyboardType: keyboardType,
+      validator: validator,
+      style: const TextStyle(color: AppColors.limestoneWhite),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: const TextStyle(color: AppColors.riverstone),
+        errorStyle: const TextStyle(color: Color(0xFFE38E7E)),
+        filled: true,
+        fillColor: Colors.white.withValues(alpha: 0.06),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.chipRadius),
+          borderSide: BorderSide.none,
         ),
-      );
+      ),
+    );
+  }
 }
