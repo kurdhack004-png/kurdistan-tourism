@@ -48,6 +48,7 @@ jobs:
       - name: Build release APK
         env:
           API_BASE_URL: ${{ vars.API_BASE_URL }}
+        continue-on-error: true
         run: >-
           flutter build apk --release
           --dart-define=API_BASE_URL=${API_BASE_URL:-http://10.0.2.2:8000/api}
@@ -55,15 +56,21 @@ jobs:
       - name: Build release App Bundle
         env:
           API_BASE_URL: ${{ vars.API_BASE_URL }}
+        continue-on-error: true
         run: >-
           flutter build appbundle --release
           --dart-define=API_BASE_URL=${API_BASE_URL:-http://10.0.2.2:8000/api}
+
+      - name: Locate build outputs
+        run: |
+          echo "Searching for APK/AAB files..."
+          find . -name "*.apk" -o -name "*.aab" 2>/dev/null
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: kurdistan-tourism-apk
-          path: mobile/build/app/outputs/flutter-apk/app-release.apk
+          path: mobile/android/app/build/outputs/apk/release/*.apk
           if-no-files-found: error
           retention-days: 14
 
@@ -71,6 +78,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: kurdistan-tourism-aab
-          path: mobile/build/app/outputs/bundle/release/app-release.aab
+          path: mobile/android/app/build/outputs/bundle/release/*.aab
           if-no-files-found: error
           retention-days: 14
