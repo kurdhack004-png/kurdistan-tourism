@@ -13,71 +13,47 @@ jobs:
     name: Flutter Android Release APK
     runs-on: ubuntu-24.04
     timeout-minutes: 30
-
     defaults:
       run:
         working-directory: mobile
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Set up Java 21
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '21'
           cache: gradle
-
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
-
-      - name: Flutter doctor
-        run: flutter doctor -v
-
       - name: Get dependencies
         run: flutter pub get
-
       - name: Analyze
         run: flutter analyze
-        continue-on-error: true
-
       - name: Build release APK
         env:
           API_BASE_URL: ${{ vars.API_BASE_URL }}
-        continue-on-error: true
-        run: >-
-          flutter build apk --release
-          --dart-define=API_BASE_URL=${API_BASE_URL:-http://10.0.2.2:8000/api}
-
+        run: flutter build apk --release --dart-define=API_BASE_URL=${API_BASE_URL:-http://10.0.2.2:8000/api}
       - name: Build release App Bundle
         env:
           API_BASE_URL: ${{ vars.API_BASE_URL }}
-        continue-on-error: true
-        run: >-
-          flutter build appbundle --release
-          --dart-define=API_BASE_URL=${API_BASE_URL:-http://10.0.2.2:8000/api}
-
-      - name: Locate build outputs
-        run: |
-          echo "Searching for APK/AAB files..."
-          find . -name "*.apk" -o -name "*.aab" 2>/dev/null
-
+        run: flutter build appbundle --release --dart-define=API_BASE_URL=${API_BASE_URL:-http://10.0.2.2:8000/api}
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: kurdistan-tourism-apk
-          path: mobile/android/app/build/outputs/apk/release/*.apk
+          path: mobile/build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
           retention-days: 14
-
       - name: Upload AAB
         uses: actions/upload-artifact@v4
         with:
           name: kurdistan-tourism-aab
-          path: mobile/android/app/build/outputs/bundle/release/*.aab
+          path: mobile/build/app/outputs/bundle/release/app-release.aab
           if-no-files-found: error
           retention-days: 14
+          
