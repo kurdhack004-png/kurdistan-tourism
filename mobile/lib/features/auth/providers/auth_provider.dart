@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_client.dart';
@@ -22,8 +23,7 @@ class AuthState {
     String? error,
     bool clearError = false,
     bool? isLocalMode,
-  }) =>
-      AuthState(
+  }) => AuthState(
         isAuthenticated: isAuthenticated ?? this.isAuthenticated,
         isLoading: isLoading ?? this.isLoading,
         error: clearError ? null : (error ?? this.error),
@@ -40,33 +40,43 @@ class AuthNotifier extends StateNotifier<AuthState> {
   late final Future<void> ready;
 
   Future<void> _restoreSession() async {
-    final token = await _api.readToken();
-    if (token != null && token.isNotEmpty) {
-      state = state.copyWith(
-        isAuthenticated: true,
-        isLocalMode: token.startsWith('local_demo_'),
-      );
+    try {
+      final token = await _api.readToken();
+      if (token != null && token.isNotEmpty) {
+        state = state.copyWith(
+          isAuthenticated: true,
+          isLocalMode: token.startsWith('local_demo_'),
+        );
+      }
+    } catch (_) {
+      // Keep the app resilient if secure storage is unavailable.
     }
+  }
+
+  static String? _extractToken(Map<String, dynamic> body) {
+    final direct = body['token'];
+    if (direct is String && direct.isNotEmpty) return direct;
+
+    final nested = body['data'];
+    if (nested is Map) {
+      final nestedToken = nested['token'];
+      if (nestedToken is String && nestedToken.isNotEmpty) return nestedToken;
+    }
+
+    return null;
   }
 
   Future<void> login(String email, String password) async {
     state = state.copyWith(isLoading: true, clearError: true);
-
     try {
       final res = await _api.client.post(
         '/auth/login',
         data: {'email': email, 'password': password},
       );
 
-      final body = Map<String, dynamic>.from(res.data as Map);
-      final data = body['data'] is Map
-          ? Map<String, dynamic>.from(body['data'] as Map)
-          : body;
-
-      final token = data['token'] as String?;
-      if (token == null || token.isEmpty) {
-        throw const FormatException('Missing token');
-      }
+      final body = res.data is Map ? Map<String, dynamic>.from(res.data as Map) : <String, dynamic>{};
+      final token = _extractToken(body);
+      if (token == null || token.isEmpty) throw const FormatException('Missing token');
 
       await _api.saveToken(token);
       state = state.copyWith(
@@ -87,8 +97,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
         state = state.copyWith(
           isLoading: false,
           isAuthenticated: false,
-          error: 'چوونەژوورەوە سەرکەوتوو نەبوو. ئیمەیل و وشەی نهێنی بپشکنە.',
           isLocalMode: false,
+          error: 'چوونەژوورەوە سەرکەوتوو نەبوو. ئیمەیل و وشەی نهێنی بپشکنە.',
         );
       }
     }
@@ -100,7 +110,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required String password,
   }) async {
     state = state.copyWith(isLoading: true, clearError: true);
-
     try {
       final res = await _api.client.post(
         '/auth/register',
@@ -112,15 +121,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
         },
       );
 
-      final body = Map<String, dynamic>.from(res.data as Map);
-      final data = body['data'] is Map
-          ? Map<String, dynamic>.from(body['data'] as Map)
-          : body;
-
-      final token = data['token'] as String?;
-      if (token == null || token.isEmpty) {
-        throw const FormatException('Missing token');
-      }
+      final body = res.data is Map ? Map<String, dynamic>.from(res.data as Map) : <String, dynamic>{};
+      final token = _extractToken(body);
+      if (token == null || token.isEmpty) throw const FormatException('Missing token');
 
       await _api.saveToken(token);
       state = state.copyWith(
@@ -128,15 +131,30 @@ class AuthNotifier extends StateNotifier<AuthState> {
         isLoading: false,
         isLocalMode: false,
       );
+    } on DioException catch (error) {
+      final status = error.response?.statusCode;
+      if (status != null && status >= 400 && status < 500) {
+        state = state.copyWith(
+          isLoading: false,
+          isAuthenticated: false,
+          error: 'زانیارییەکان دروست نین یان ئیمەیلەکە پێشتر بەکارهاتووە.',
+        );
+      } else {
+        await _registerLocal(fullName, email, password);
+      }
     } catch (_) {
-      await DemoAuth.register(fullName, email, password);
-      await _api.saveToken('local_demo_${email.trim().toLowerCase()}');
-      state = state.copyWith(
-        isAuthenticated: true,
-        isLoading: false,
-        isLocalMode: true,
-      );
+      await _registerLocal(fullName, email, password);
     }
+  }
+
+  Future<void> _registerLocal(String fullName, String email, String password) async {
+    await DemoAuth.register(fullName, email, password);
+    await _api.saveToken('local_demo_${email.trim().toLowerCase()}');
+    state = state.copyWith(
+      isAuthenticated: true,
+      isLoading: false,
+      isLocalMode: true,
+    );
   }
 
   Future<void> logout() async {
