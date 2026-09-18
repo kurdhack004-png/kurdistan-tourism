@@ -8,21 +8,13 @@ import '../trip/presentation/trip_planner_screen.dart';
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
-
   @override
   State<MainShell> createState() => _MainShellState();
 }
 
 class _MainShellState extends State<MainShell> {
   int _index = 0;
-
-  static const _screens = [
-    HomeScreen(),
-    LocationsMapScreen(),
-    FavoritesScreen(),
-    TripPlannerScreen(),
-    ProfileScreen(),
-  ];
+  static const _screens = [HomeScreen(), LocationsMapScreen(), FavoritesScreen(), TripPlannerScreen(), ProfileScreen()];
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +25,7 @@ class _MainShellState extends State<MainShell> {
         selectedIndex: _index,
         onDestinationSelected: (i) => setState(() => _index = i),
         backgroundColor: Theme.of(context).colorScheme.surface,
-        indicatorColor: AppColors.saffron.withOpacity(dark ? 0.22 : 0.25),
+        indicatorColor: AppColors.saffron.withValues(alpha: dark ? 0.22 : 0.25),
         destinations: const [
           NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'سەرەتا'),
           NavigationDestination(icon: Icon(Icons.map_outlined), selectedIcon: Icon(Icons.map), label: 'نەخشە'),

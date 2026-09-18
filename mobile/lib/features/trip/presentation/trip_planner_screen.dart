@@ -13,31 +13,16 @@ class TripPlannerScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tripIds = ref.watch(tripProvider);
-
     return Scaffold(
       appBar: AppBar(title: const Text('پلانی گەشتم')),
       body: FutureBuilder<List<TouristLocation>>(
-        // Trip items are drawn from whatever's already cached locally —
-        // they were only addable from a detail screen the user had
-        // already opened, so they're guaranteed to be in the cache.
         future: ref.read(locationCacheProvider).load(),
         builder: (context, snapshot) {
           final all = snapshot.data == null || snapshot.data!.isEmpty ? demoLocations : snapshot.data!;
           final trip = all.where((l) => tripIds.contains(l.id)).toList();
-
           if (trip.isEmpty) {
-            return const Center(
-              child: Padding(
-                padding: EdgeInsets.all(AppSpacing.xl),
-                child: Text(
-                  'هێشتا هیچ شوێنێکت زیاد نەکردووە. لە وردەکاری شوێنێکەوە "زیادکردن بۆ پلانی گەشتم" دابگرە.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: AppColors.riverstone),
-                ),
-              ),
-            );
+            return const Center(child: Padding(padding: EdgeInsets.all(AppSpacing.xl), child: Text('هێشتا هیچ شوێنێکت زیاد نەکردووە. لە وردەکاری شوێنێکەوە "زیادکردن بۆ پلانی گەشتم" دابگرە.', textAlign: TextAlign.center, style: TextStyle(color: AppColors.riverstone))));
           }
-
           return ListView.builder(
             padding: const EdgeInsets.all(AppSpacing.lg),
             itemCount: trip.length,
@@ -46,16 +31,10 @@ class TripPlannerScreen extends ConsumerWidget {
               return Card(
                 margin: const EdgeInsets.only(bottom: AppSpacing.sm),
                 child: ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: AppColors.saffron.withOpacity(0.25),
-                    child: Text('${i + 1}', style: const TextStyle(color: AppColors.saffronDeep)),
-                  ),
+                  leading: CircleAvatar(backgroundColor: AppColors.saffron.withValues(alpha: 0.25), child: Text('${i + 1}', style: const TextStyle(color: AppColors.saffronDeep))),
                   title: Text(loc.nameCkb),
                   subtitle: Text(loc.category),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.remove_circle_outline, color: AppColors.riverstone),
-                    onPressed: () => ref.read(tripProvider.notifier).toggle(loc.id),
-                  ),
+                  trailing: IconButton(icon: const Icon(Icons.remove_circle_outline, color: AppColors.riverstone), onPressed: () => ref.read(tripProvider.notifier).toggle(loc.id)),
                 ),
               );
             },

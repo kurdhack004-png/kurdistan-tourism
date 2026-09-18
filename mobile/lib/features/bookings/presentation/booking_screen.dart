@@ -49,22 +49,8 @@ class _BookingScreenState extends State<BookingScreen> {
         children: [
           Text(widget.accommodationName, style: Theme.of(context).textTheme.headlineMedium),
           const SizedBox(height: AppSpacing.lg),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.calendar_month_outlined),
-              title: const Text('چوونەژوورەوە'),
-              subtitle: Text(_fmt(_checkIn)),
-              onTap: () => _pickDate(isCheckIn: true),
-            ),
-          ),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.calendar_month_outlined),
-              title: const Text('چوونەدەرەوە'),
-              subtitle: Text(_fmt(_checkOut)),
-              onTap: () => _pickDate(isCheckIn: false),
-            ),
-          ),
+          Card(child: ListTile(leading: const Icon(Icons.calendar_month_outlined), title: const Text('چوونەژوورەوە'), subtitle: Text(_fmt(_checkIn)), onTap: () => _pickDate(isCheckIn: true))),
+          Card(child: ListTile(leading: const Icon(Icons.calendar_month_outlined), title: const Text('چوونەدەرەوە'), subtitle: Text(_fmt(_checkOut)), onTap: () => _pickDate(isCheckIn: false))),
           const SizedBox(height: AppSpacing.md),
           Card(
             child: ListTile(
@@ -72,49 +58,33 @@ class _BookingScreenState extends State<BookingScreen> {
               title: const Text('ژمارەی میوان'),
               trailing: SizedBox(
                 width: 120,
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.remove_circle_outline),
-                      onPressed: _guests > 1 ? () => setState(() => _guests--) : null,
-                    ),
-                    Text('$_guests', style: const TextStyle(fontSize: 15)),
-                    IconButton(
-                      icon: const Icon(Icons.add_circle_outline),
-                      onPressed: _guests < 20 ? () => setState(() => _guests++) : null,
-                    ),
-                  ],
-                ),
+                child: Row(children: [
+                  IconButton(icon: const Icon(Icons.remove_circle_outline), onPressed: _guests > 1 ? () => setState(() => _guests--) : null),
+                  Text('$_guests', style: const TextStyle(fontSize: 15)),
+                  IconButton(icon: const Icon(Icons.add_circle_outline), onPressed: _guests < 20 ? () => setState(() => _guests++) : null),
+                ]),
               ),
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
           Container(
             padding: const EdgeInsets.all(AppSpacing.md),
-            decoration: BoxDecoration(
-              color: AppColors.saffron.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('$_nights شەو', style: Theme.of(context).textTheme.bodyMedium),
-                Text('${_total.toStringAsFixed(0)} د.ع', style: Theme.of(context).textTheme.titleMedium),
-              ],
-            ),
+            decoration: BoxDecoration(color: AppColors.saffron.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(AppSpacing.cardRadius)),
+            child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+              Text('$_nights شەو', style: Theme.of(context).textTheme.bodyMedium),
+              Text('${_total.toStringAsFixed(0)} د.ع', style: Theme.of(context).textTheme.titleMedium),
+            ]),
           ),
           const SizedBox(height: AppSpacing.xl),
           FilledButton(
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-              builder: (_) => PaymentScreen(
-                accommodationId: widget.accommodationId,
-            accommodationName: widget.accommodationName,
-                checkIn: _checkIn,
-                checkOut: _checkOut,
-                guests: _guests,
-                total: _total,
-              ),
-            )),
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => PaymentScreen(
+              accommodationId: widget.accommodationId,
+              accommodationName: widget.accommodationName,
+              checkIn: _checkIn,
+              checkOut: _checkOut,
+              guests: _guests,
+              total: _total,
+            ))),
             child: const Text('بەردەوامبوون بۆ پارەدان'),
           ),
         ],

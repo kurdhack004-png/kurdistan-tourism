@@ -56,14 +56,14 @@ class _StatusChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final labels = {
       'pending': 'چاوەڕوان',
-      'confirmed': 'پشتڕاستکراوە',
+      'confirmed': 'پ��تڕاستکراوە',
       'cancelled': 'هەڵوەشێنراوە',
       'completed': 'تەواوبووە',
     };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.saffron.withOpacity(0.2),
+        color: AppColors.saffron.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(labels[status] ?? status,
