@@ -34,10 +34,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     await ref.read(authProvider.notifier).register(
-          fullName: _nameCtrl.text.trim(),
-          email: _emailCtrl.text.trim(),
-          password: _passwordCtrl.text,
-        );
+      fullName: _nameCtrl.text.trim(),
+      email: _emailCtrl.text.trim(),
+      password: _passwordCtrl.text,
+    );
 
     if (!mounted) return;
     if (ref.read(authProvider).isAuthenticated) {
@@ -68,8 +68,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Icon(Icons.person_add_alt_1_rounded,
-                    size: 48, color: AppColors.saffron),
+                const Icon(Icons.person_add_alt_1_rounded, size: 48, color: AppColors.saffron),
                 const SizedBox(height: AppSpacing.md),
                 const Text(
                   'هەژمارێکی نوێ دروست بکە',
@@ -95,8 +94,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
                     final email = value?.trim() ?? '';
-                    return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
-                            .hasMatch(email)
+                    return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email)
                         ? null
                         : 'تکایە ئیمەیلی دروست بنووسە';
                   },
