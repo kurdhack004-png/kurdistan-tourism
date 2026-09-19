@@ -42,14 +42,14 @@ jobs:
           flutter --version
           java -version
 
+      - name: Clean Flutter build
+        run: flutter clean
+
       - name: Get dependencies
         run: flutter pub get
 
       - name: Analyze
         run: flutter analyze
-
-      - name: Clean Flutter build
-        run: flutter clean
 
       - name: Build APK with Gradle
         working-directory: mobile/android
