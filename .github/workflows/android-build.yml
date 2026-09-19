@@ -3,16 +3,18 @@ name: Build Kurdistan Tourism Android
 on:
   workflow_dispatch:
   push:
-    branches: [ main, master ]
+    branches:
+      - main
+      - master
 
 permissions:
   contents: read
 
 jobs:
   build-android:
-    name: Flutter Android Release APK
+    name: Flutter Android Release APK and AAB
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 40
 
     defaults:
       run:
@@ -26,7 +28,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '21'
+          java-version: "21"
           cache: gradle
 
       - name: Set up Flutter
@@ -35,21 +37,53 @@ jobs:
           channel: stable
           cache: true
 
+      - name: Show tool versions
+        run: |
+          flutter --version
+          java -version
+
       - name: Get dependencies
         run: flutter pub get
 
       - name: Analyze
         run: flutter analyze
 
+      - name: Clean Flutter build
+        run: flutter clean
+
       - name: Build APK
         env:
           API_BASE_URL: ${{ vars.API_BASE_URL }}
-        run: flutter build apk --release --dart-define=API_BASE_URL=${API_BASE_URL:-http://10.0.2.2:8000/api}
+          GRADLE_OPTS: >-
+            -Dorg.gradle.vfs.watch=false
+            -Dorg.gradle.daemon=false
+        run: >
+          flutter build apk
+          --release
+          --android-skip-build-dependency-validation
+          --dart-define=API_BASE_URL=${API_BASE_URL:-http://10.0.2.2:8000/api}
+
+      - name: Verify APK
+        run: |
+          test -f build/app/outputs/flutter-apk/app-release.apk
+          ls -lh build/app/outputs/flutter-apk/app-release.apk
 
       - name: Build AAB
         env:
           API_BASE_URL: ${{ vars.API_BASE_URL }}
-        run: flutter build appbundle --release --dart-define=API_BASE_URL=${API_BASE_URL:-http://10.0.2.2:8000/api}
+          GRADLE_OPTS: >-
+            -Dorg.gradle.vfs.watch=false
+            -Dorg.gradle.daemon=false
+        run: >
+          flutter build appbundle
+          --release
+          --android-skip-build-dependency-validation
+          --dart-define=API_BASE_URL=${API_BASE_URL:-http://10.0.2.2:8000/api}
+
+      - name: Verify AAB
+        run: |
+          test -f build/app/outputs/bundle/release/app-release.aab
+          ls -lh build/app/outputs/bundle/release/app-release.aab
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
@@ -57,6 +91,7 @@ jobs:
           name: kurdistan-tourism-apk
           path: mobile/build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
+          retention-days: 14
 
       - name: Upload AAB
         uses: actions/upload-artifact@v4
@@ -64,3 +99,4 @@ jobs:
           name: kurdistan-tourism-aab
           path: mobile/build/app/outputs/bundle/release/app-release.aab
           if-no-files-found: error
+          retention-days: 14
