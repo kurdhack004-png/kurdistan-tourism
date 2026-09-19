@@ -2,28 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/category_visual.dart';
 import '../../models/tourist_location.dart';
 import 'rating_badge.dart';
-
-/// Maps a location's category to an icon + tint so the placeholder (and
-/// any failed network image) still reads as "this is a mountain / lake /
-/// cave / waterfall card", not a dead grey box.
-(IconData, Color) _categoryVisual(String category) {
-  switch (category) {
-    case 'mountain':
-      return (Icons.terrain_rounded, AppColors.clay);
-    case 'lake':
-      return (Icons.water_rounded, const Color(0xFF3D6E8C));
-    case 'cave':
-      return (Icons.landscape_rounded, AppColors.riverstone);
-    case 'waterfall':
-      return (Icons.water_drop_rounded, const Color(0xFF2E7D6B));
-    case 'history':
-      return (Icons.account_balance_rounded, AppColors.saffronDeep);
-    default:
-      return (Icons.place_rounded, AppColors.clay);
-  }
-}
 
 class _CategoryPlaceholder extends StatelessWidget {
   const _CategoryPlaceholder({required this.category});
@@ -31,7 +12,7 @@ class _CategoryPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (icon, color) = _categoryVisual(category);
+    final (icon, color) = categoryVisual(category);
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
