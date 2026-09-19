@@ -143,7 +143,7 @@ class _DarkField extends StatelessWidget {
         hintText: hint,
         hintStyle: const TextStyle(color: AppColors.riverstone),
         filled: true,
-        fillColor: Colors.white.withOpacity(0.06),
+        fillColor: Colors.white.withValues(alpha: 0.06),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSpacing.chipRadius),
           borderSide: BorderSide.none,
