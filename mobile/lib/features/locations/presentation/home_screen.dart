@@ -32,7 +32,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          SliverToBoxAdapter(child: _Hero()),
+          SliverToBoxAdapter(child: _Hero(count: nearby.value?.length)),
           SliverToBoxAdapter(
             child: MountainRidgeDivider(color: Theme.of(context).scaffoldBackgroundColor),
           ),
@@ -104,6 +104,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 }
 
 class _Hero extends StatelessWidget {
+  const _Hero({this.count});
+  final int? count;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -144,8 +147,10 @@ class _Hero extends StatelessWidget {
                       .displayLarge
                       ?.copyWith(color: AppColors.limestoneWhite, fontSize: 22)),
               const SizedBox(height: 4),
-              const Text('٤٨ شوێنی نوێ ئەم وەرزە',
-                  style: TextStyle(color: Color(0xFFC9C2AA), fontSize: 12)),
+              Text(
+                count == null ? 'بارکردنی شوێنەکان...' : '$count شوێنی گەشتیاری بەردەستە',
+                style: const TextStyle(color: Color(0xFFC9C2AA), fontSize: 12),
+              ),
             ],
           ),
         ],

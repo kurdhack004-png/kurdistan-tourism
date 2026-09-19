@@ -9,6 +9,22 @@ import 'features/splash/presentation/splash_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // In release builds Flutter silently swaps any widget that throws
+  // during build for a blank grey box, which is impossible to debug from
+  // a screenshot. Show the actual error text instead, in every build
+  // mode, so a crash is diagnosable instead of just "a grey rectangle".
+  ErrorWidget.builder = (FlutterErrorDetails details) => Container(
+        color: const Color(0xFFFFF3F1),
+        padding: const EdgeInsets.all(12),
+        alignment: Alignment.center,
+        child: Text(
+          'هەڵەیەک ڕوویدا:\n${details.exceptionAsString()}',
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: Color(0xFFA33B2E), fontSize: 11),
+        ),
+      );
+
   await EasyLocalization.ensureInitialized();
   final prefs = await SharedPreferences.getInstance();
   final savedLanguage = prefs.getString('settings_language') ?? 'ckb';
