@@ -9,6 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:          # Material/Widgets/Cupertino strings (ckb handled in core/localization)
+    sdk: flutter
   flutter_riverpod: ^2.5.1
   dio: ^5.4.3                     # HTTP client
   flutter_secure_storage: ^9.2.2  # secure token storage (not SharedPreferences)

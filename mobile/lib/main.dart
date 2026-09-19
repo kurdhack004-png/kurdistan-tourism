@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'core/localization/ckb_localizations.dart';
 import 'core/theme/app_theme.dart';
 import 'features/settings/providers/settings_provider.dart';
 import 'features/splash/presentation/splash_screen.dart';
@@ -60,7 +61,13 @@ class KurdistanTourismApp extends ConsumerWidget {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: themeMode,
-      localizationsDelegates: context.localizationDelegates,
+      // ckb delegates first: Flutter has no built-in Sorani localizations,
+      // which caused "Null check operator used on a null value" in
+      // NavigationBar / TextField / AppBar.
+      localizationsDelegates: [
+        ...ckbLocalizationDelegates,
+        ...context.localizationDelegates,
+      ],
       supportedLocales: context.supportedLocales,
       locale: context.locale,
       // Force RTL for Kurdish/Arabic explicitly — Flutter's built-in RTL
