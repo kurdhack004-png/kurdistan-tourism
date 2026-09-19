@@ -51,38 +51,57 @@ jobs:
       - name: Clean Flutter build
         run: flutter clean
 
-      - name: Build APK
+      - name: Build APK with Gradle
+        working-directory: mobile/android
         env:
-          API_BASE_URL: ${{ vars.API_BASE_URL }}
           GRADLE_OPTS: >-
-            -Dorg.gradle.vfs.watch=false
             -Dorg.gradle.daemon=false
-        run: >
-          flutter build apk
-          --release
-          --android-skip-build-dependency-validation
-          --dart-define=API_BASE_URL=${API_BASE_URL:-http://10.0.2.2:8000/api}
-
-      - name: Verify APK
+            -Dorg.gradle.vfs.watch=false
         run: |
-          test -f build/app/outputs/flutter-apk/app-release.apk
+          chmod +x gradlew
+          ./gradlew --stop || true
+          ./gradlew :app:assembleRelease --no-daemon --no-watch-fs --stacktrace
+
+      - name: Collect APK
+        working-directory: mobile
+        run: |
+          mkdir -p build/app/outputs/flutter-apk
+          APK="$(find android/app/build/outputs/apk -type f -name '*.apk' | head -n 1)"
+
+          if [ -z "$APK" ]; then
+            echo "APK was not generated"
+            find android/app/build -type f | sort || true
+            exit 1
+          fi
+
+          echo "APK found at: $APK"
+          cp "$APK" build/app/outputs/flutter-apk/app-release.apk
           ls -lh build/app/outputs/flutter-apk/app-release.apk
 
-      - name: Build AAB
+      - name: Build AAB with Gradle
+        working-directory: mobile/android
         env:
-          API_BASE_URL: ${{ vars.API_BASE_URL }}
           GRADLE_OPTS: >-
-            -Dorg.gradle.vfs.watch=false
             -Dorg.gradle.daemon=false
-        run: >
-          flutter build appbundle
-          --release
-          --android-skip-build-dependency-validation
-          --dart-define=API_BASE_URL=${API_BASE_URL:-http://10.0.2.2:8000/api}
-
-      - name: Verify AAB
+            -Dorg.gradle.vfs.watch=false
         run: |
-          test -f build/app/outputs/bundle/release/app-release.aab
+          chmod +x gradlew
+          ./gradlew :app:bundleRelease --no-daemon --no-watch-fs --stacktrace
+
+      - name: Collect AAB
+        working-directory: mobile
+        run: |
+          mkdir -p build/app/outputs/bundle/release
+          AAB="$(find android/app/build/outputs/bundle -type f -name '*.aab' | head -n 1)"
+
+          if [ -z "$AAB" ]; then
+            echo "AAB was not generated"
+            find android/app/build -type f | sort || true
+            exit 1
+          fi
+
+          echo "AAB found at: $AAB"
+          cp "$AAB" build/app/outputs/bundle/release/app-release.aab
           ls -lh build/app/outputs/bundle/release/app-release.aab
 
       - name: Upload APK

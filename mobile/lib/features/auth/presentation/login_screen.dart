@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../shell/main_shell.dart';
@@ -15,7 +14,6 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
-  final _formKey = GlobalKey<FormState>();
   final _emailCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
 
@@ -27,20 +25,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _submit() async {
-    FocusManager.instance.primaryFocus?.unfocus();
-    if (!_formKey.currentState!.validate()) return;
-
-    await ref.read(authProvider.notifier).login(
-      _emailCtrl.text.trim(),
-      _passCtrl.text,
-    );
-
-    if (!mounted) return;
-    if (ref.read(authProvider).isAuthenticated) {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const MainShell()),
-        (_) => false,
-      );
+    await ref.read(authProvider.notifier).login(_emailCtrl.text.trim(), _passCtrl.text);
+    final state = ref.read(authProvider);
+    if (state.isAuthenticated && mounted) {
+      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const MainShell()));
     }
   }
 
@@ -50,100 +38,81 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.ink,
+      // Ensure the keyboard never pushes/resizes content into a stray
+      // empty region, and that the Scaffold always paints a solid
+      // background edge-to-edge (no default Material gray showing through).
       resizeToAvoidBottomInset: true,
       body: SafeArea(
         child: LayoutBuilder(
-          builder: (context, constraints) => SingleChildScrollView(
-            padding: const EdgeInsets.all(AppSpacing.xl),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: constraints.maxHeight),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const Icon(Icons.terrain_rounded, size: 48, color: AppColors.saffron),
-                    const SizedBox(height: AppSpacing.md),
-                    const Text(
-                      'چوونەژوورەوە',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: AppColors.limestoneWhite,
-                        fontSize: 22,
-                        fontWeight: FontWeight.w700,
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(AppSpacing.xl),
+              child: ConstrainedBox(
+                // Fill at least the visible height so the Column's
+                // mainAxisAlignment.center behaves predictably instead of
+                // collapsing to its intrinsic size inside a scroll view.
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: IntrinsicHeight(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Icon(Icons.terrain_rounded, size: 48, color: AppColors.saffron),
+                      const SizedBox(height: AppSpacing.md),
+                      const Text(
+                        'چوونەژوورەوە',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: AppColors.limestoneWhite,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: AppSpacing.xl),
-                    _DarkField(
-                      controller: _emailCtrl,
-                      hint: 'ئیمەیل',
-                      keyboardType: TextInputType.emailAddress,
-                      validator: (value) {
-                        final email = value?.trim() ?? '';
-                        return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email)
-                            ? null
-                            : 'تکایە ئیمەیلی دروست بنووسە';
-                      },
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    _DarkField(
-                      controller: _passCtrl,
-                      hint: 'وشەی نهێنی',
-                      obscure: true,
-                      validator: (value) =>
-                          (value == null || value.isEmpty)
-                              ? 'تکایە وشەی نهێنی بنووسە'
-                              : null,
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    if (auth.error != null)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                        child: Text(
-                          auth.error!,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Color(0xFFE38E7E),
-                            fontSize: 13,
+                      const SizedBox(height: AppSpacing.xl),
+                      _DarkField(
+                        controller: _emailCtrl,
+                        hint: 'ئیمەیل',
+                        keyboardType: TextInputType.emailAddress,
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      _DarkField(controller: _passCtrl, hint: 'وشەی نهێنی', obscure: true),
+                      const SizedBox(height: AppSpacing.lg),
+                      if (auth.error != null)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                          child: Text(
+                            auth.error!,
+                            style: const TextStyle(color: Color(0xFFE38E7E), fontSize: 13),
                           ),
                         ),
-                      ),
-                    FilledButton(
-                      onPressed: auth.isLoading ? null : _submit,
-                      child: auth.isLoading
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: AppColors.inkDeep,
-                              ),
-                            )
-                          : const Text('چوونەژوورەوە'),
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    TextButton(
-                      onPressed: auth.isLoading
-                          ? null
-                          : () => Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (_) => const RegisterScreen(),
+                      FilledButton(
+                        onPressed: auth.isLoading ? null : _submit,
+                        child: auth.isLoading
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: AppColors.inkDeep,
                                 ),
-                              ),
-                      child: const Text(
-                        'هەژمارت نییە؟ خۆت تۆمار بکە',
-                        style: TextStyle(
-                          color: AppColors.riverstone,
-                          fontSize: 13,
+                              )
+                            : const Text('چوونەژوورەوە'),
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      TextButton(
+                        onPressed: () => Navigator.of(context)
+                            .push(MaterialPageRoute(builder: (_) => const RegisterScreen())),
+                        child: const Text(
+                          'هەژمارت نییە؟ خۆت تۆمار بکە',
+                          style: TextStyle(color: AppColors.riverstone, fontSize: 13),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ),
+            );
+          },
         ),
       ),
     );
@@ -156,29 +125,25 @@ class _DarkField extends StatelessWidget {
     required this.hint,
     this.obscure = false,
     this.keyboardType,
-    this.validator,
   });
 
   final TextEditingController controller;
   final String hint;
   final bool obscure;
   final TextInputType? keyboardType;
-  final String? Function(String?)? validator;
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
+    return TextField(
       controller: controller,
       obscureText: obscure,
       keyboardType: keyboardType,
-      validator: validator,
       style: const TextStyle(color: AppColors.limestoneWhite),
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: const TextStyle(color: AppColors.riverstone),
-        errorStyle: const TextStyle(color: Color(0xFFE38E7E)),
         filled: true,
-        fillColor: Colors.white.withValues(alpha: 0.06),
+        fillColor: Colors.white.withOpacity(0.06),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSpacing.chipRadius),
           borderSide: BorderSide.none,
