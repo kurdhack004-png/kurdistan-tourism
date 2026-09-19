@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../onboarding/presentation/onboarding_screen.dart';
-import '../../auth/presentation/login_screen.dart';
 import '../../shell/main_shell.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
@@ -26,21 +23,17 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     await ref.read(authProvider.notifier).ready;
     if (!mounted) return;
 
-    final prefs = await SharedPreferences.getInstance();
-    final seenOnboarding = prefs.getBool('seen_onboarding') ?? false;
+    // TEMPORARY: skip onboarding and login entirely, and guarantee an
+    // authenticated (local demo) session so the dashboard has a valid
+    // auth state to work with. Remove this bypass once login/backend
+    // are ready and you want the normal onboarding -> login flow back.
     final auth = ref.read(authProvider);
-
-    Widget next;
-    if (!seenOnboarding) {
-      next = const OnboardingScreen();
-    } else if (auth.isAuthenticated) {
-      next = const MainShell();
-    } else {
-      next = const LoginScreen();
+    if (!auth.isAuthenticated) {
+      await ref.read(authProvider.notifier).bypassForTesting();
     }
 
     if (!mounted) return;
-    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => next));
+    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const MainShell()));
   }
 
   @override
@@ -53,7 +46,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
           children: [
             Icon(Icons.terrain_rounded, size: 56, color: AppColors.saffron),
             SizedBox(height: 16),
-            Text('گەشتیاری کوردستان',
+            Text('诏蹠卮鬲蹖丕乇蹖 讴賵乇丿爻鬲丕賳',
                 style: TextStyle(color: AppColors.limestoneWhite, fontSize: 18, fontWeight: FontWeight.w600)),
           ],
         ),
