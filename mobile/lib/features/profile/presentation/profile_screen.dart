@@ -11,6 +11,7 @@ import '../../emergency/presentation/emergency_screen.dart';
 import '../../notifications/presentation/notifications_screen.dart';
 import '../../settings/presentation/settings_screen.dart';
 import '../../trip/presentation/trip_planner_screen.dart';
+import '../../admin/presentation/admin_dashboard_screen.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -64,6 +65,8 @@ class ProfileScreen extends ConsumerWidget {
               MaterialPageRoute(builder: (_) => const SettingsScreen())),
           ),
           const SizedBox(height: AppSpacing.lg),
+          if (ref.watch(authProvider).isAuthenticated && ref.watch(authProvider).role == 'admin')
+            _ProfileTile(icon: Icons.admin_panel_settings_outlined, label: 'admin_panel'.tr(), onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AdminDashboardScreen()))),
           if (!ref.watch(authProvider).isAuthenticated) ...[
             _ProfileTile(
               icon: Icons.login_rounded,
