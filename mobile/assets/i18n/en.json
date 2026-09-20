@@ -126,5 +126,16 @@
   "status_pending": "Pending",
   "status_confirmed": "Confirmed",
   "status_cancelled": "Cancelled",
-  "status_completed": "Completed"
+  "status_completed": "Completed",
+  "admin_panel": "Admin panel",
+  "admin_dashboard": "Admin dashboard",
+  "admin_dashboard_hint": "Manage places, accommodation, bookings, users, reviews and advertisements",
+  "admin_only": "This section is for administrators only",
+  "admin_load_failed": "Could not load admin data",
+  "admin_places": "Tourist places",
+  "admin_accommodations": "Accommodation",
+  "admin_bookings": "Bookings",
+  "admin_users": "Users",
+  "admin_reviews": "Reviews",
+  "admin_ads": "Advertisements"
 }
