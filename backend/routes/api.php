@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AccommodationController;
+use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\FavoriteController;
@@ -36,6 +37,30 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/favorites', [FavoriteController::class, 'index']);
     Route::post('/favorites', [FavoriteController::class, 'store']);
     Route::delete('/favorites/{type}/{id}', [FavoriteController::class, 'destroy']);
+
+    Route::middleware('role:admin')->prefix('admin')->group(function () {
+        Route::get('/locations', [AdminController::class, 'locations']);
+        Route::delete('/locations/{id}', [AdminController::class, 'deleteLocation']);
+
+        Route::get('/accommodations', [AdminController::class, 'accommodations']);
+        Route::post('/accommodations', [AdminController::class, 'storeAccommodation']);
+        Route::patch('/accommodations/{id}', [AdminController::class, 'updateAccommodation']);
+        Route::delete('/accommodations/{id}', [AdminController::class, 'deleteAccommodation']);
+
+        Route::get('/bookings', [AdminController::class, 'bookings']);
+        Route::patch('/bookings/{id}', [AdminController::class, 'updateBooking']);
+
+        Route::get('/users', [AdminController::class, 'users']);
+        Route::patch('/users/{id}', [AdminController::class, 'updateUser']);
+
+        Route::get('/reviews', [AdminController::class, 'reviews']);
+        Route::delete('/reviews/{id}', [AdminController::class, 'deleteReview']);
+
+        Route::get('/ads', [AdminController::class, 'ads']);
+        Route::post('/ads', [AdminController::class, 'storeAd']);
+        Route::patch('/ads/{id}', [AdminController::class, 'updateAd']);
+        Route::delete('/ads/{id}', [AdminController::class, 'deleteAd']);
+    });
 
     Route::middleware('role:guide,admin')->group(function () {
         Route::patch('/locations/{id}/verify', function (string $id) {
