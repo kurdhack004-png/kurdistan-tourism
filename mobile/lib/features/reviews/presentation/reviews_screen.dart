@@ -20,7 +20,7 @@ class ReviewsScreen extends ConsumerWidget {
     final reviews = ref.watch(reviewsProvider(key));
 
     return Scaffold(
-      appBar: AppBar(title: Text('ڕیڤیوی $title')),
+      appBar: AppBar(title: Text('review_title'.tr(namedArgs: {'title': title}))),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: AppColors.saffron,
         foregroundColor: AppColors.inkDeep,
@@ -31,9 +31,8 @@ class ReviewsScreen extends ConsumerWidget {
       body: reviews.when(
         data: (items) {
           if (items.isEmpty) {
-            return const Center(
-              child: Text('هێشتا هیچ ڕیڤیوێک نییە — یەکەم کەس بە کە!',
-                  style: TextStyle(color: AppColors.riverstone)),
+            return Center(
+              child: Text('review_empty'.tr(), style: const TextStyle(color: AppColors.riverstone)),
             );
           }
           return ListView.builder(
@@ -62,7 +61,7 @@ class ReviewsScreen extends ConsumerWidget {
         },
         loading: () => const Center(child: CircularProgressIndicator(color: AppColors.saffron)),
         error: (e, st) => Center(
-          child: Text('نەتوانرا ڕیڤیوەکان بار بکرێن', style: Theme.of(context).textTheme.bodyMedium)),
+          child: Text('reviews_load_failed'.tr(), style: Theme.of(context).textTheme.bodyMedium)),
       ),
     );
   }
