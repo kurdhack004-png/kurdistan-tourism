@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../shell/main_shell.dart';
+import '../../settings/presentation/language_selection_screen.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -27,8 +29,14 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     // Guest mode: opening the app never creates a fake authenticated session.
     // Authentication is requested only when the user starts a protected flow
     // such as accommodation booking/payment.
+    final prefs = await SharedPreferences.getInstance();
+    final hasSelectedLanguage = prefs.containsKey('settings_language');
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const MainShell()),
+      MaterialPageRoute(
+        builder: (_) => hasSelectedLanguage
+            ? const MainShell()
+            : const LanguageSelectionScreen(),
+      ),
     );
   }
 
