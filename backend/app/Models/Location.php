@@ -14,7 +14,7 @@ class Location extends Model
 
     protected $fillable = [
         'category', 'governorate_id', 'district_id', 'name_ckb', 'name_ar', 'name_en',
-        'description_ckb', 'description_en', 'geom', 'elevation_meters',
+        'description_ckb', 'description_ar', 'description_en', 'geom', 'elevation_meters',
         'is_verified', 'created_by',
     ];
 
