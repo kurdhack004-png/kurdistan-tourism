@@ -18,7 +18,7 @@ class ProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: AppBar(title: const Text('profile_title'.tr())),
+      appBar: AppBar(title: Text('profile_title'.tr())),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
