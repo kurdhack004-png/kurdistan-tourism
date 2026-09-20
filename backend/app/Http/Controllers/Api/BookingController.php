@@ -8,10 +8,10 @@ use App\Models\Accommodation;
 use App\Models\Booking;
 use App\Models\Payment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class BookingController extends Controller
 {
-    /** GET /api/bookings — the authenticated user's own booking history. */
     public function index(Request $request)
     {
         $bookings = Booking::with(['accommodation', 'payment'])
@@ -25,29 +25,45 @@ class BookingController extends Controller
     public function store(StoreBookingRequest $request)
     {
         $data = $request->validated();
-        $accommodation = Accommodation::findOrFail($data['accommodation_id']);
 
-        $nights = max(1, \Carbon\Carbon::parse($data['check_in'])->diffInDays($data['check_out']));
-        // Product rule: 10,000 IQD booking service fee per accommodation booking.
-        $bookingFee = 10000;
-        $total = $nights * (float) $accommodation->price_per_night + $bookingFee;
+        $booking = DB::transaction(function () use ($data, $request) {
+            $accommodation = Accommodation::whereKey($data['accommodation_id'])
+                ->where('is_active', true)
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        $booking = Booking::create([
-            ...$data,
-            'user_id' => $request->user()->id,
-            'status' => 'pending',
-            'total_price' => $total,
-        ]);
+            if (!in_array($accommodation->type, ['hotel', 'house', 'cabin', 'chalet'], true)) {
+                abort(422, 'This accommodation type is not bookable.');
+            }
 
-        return response()->json(['success' => true, 'data' => $booking->load('accommodation')], 201);
+            $overlap = Booking::where('accommodation_id', $accommodation->id)
+                ->whereIn('status', ['pending', 'confirmed'])
+                ->where('check_in', '<', $data['check_out'])
+                ->where('check_out', '>', $data['check_in'])
+                ->exists();
+
+            if ($overlap) {
+                abort(409, 'The accommodation is not available for these dates.');
+            }
+
+            $nights = \Carbon\Carbon::parse($data['check_in'])->diffInDays($data['check_out']);
+            $bookingFee = 10000;
+            $total = $nights * (float) $accommodation->price_per_night + $bookingFee;
+
+            return Booking::create([
+                ...$data,
+                'user_id' => $request->user()->id,
+                'status' => 'pending',
+                'total_price' => $total,
+            ]);
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => $booking->load('accommodation'),
+        ], 201);
     }
 
-    /**
-     * POST /api/bookings/{id}/pay
-     * Creates the payment record. The idempotency_key means a client that
-     * retries a dropped request (e.g. on a bad mountain-road connection)
-     * never double-charges the guest.
-     */
     public function pay(Request $request, string $id)
     {
         $data = $request->validate([
@@ -57,24 +73,38 @@ class BookingController extends Controller
 
         $booking = Booking::findOrFail($id);
         abort_unless($booking->user_id === $request->user()->id, 403);
+        abort_if(in_array($booking->status, ['cancelled', 'completed'], true), 422, 'This booking cannot be paid.');
 
-        $payment = Payment::firstOrCreate(
-            ['idempotency_key' => $data['idempotency_key']],
-            [
-                'booking_id' => $booking->id,
-                'method' => $data['method'],
-                'amount' => $booking->total_price,
-                // No payment provider webhook is wired in this repository yet.
-                // Never report money as paid merely because the client called
-                // this endpoint. A provider callback/admin action must confirm it.
-                'status' => 'pending',
-            ],
-        );
+        $existing = Payment::where('idempotency_key', $data['idempotency_key'])->first();
+        if ($existing) {
+            abort_unless($existing->booking_id === $booking->id, 409, 'This payment key belongs to another booking.');
+            return response()->json(['success' => true, 'data' => $existing, 'booking' => $booking->fresh()]);
+        }
+
+        $payment = Payment::create([
+            'booking_id' => $booking->id,
+            'method' => $data['method'],
+            'amount' => $booking->total_price,
+            'status' => 'pending',
+            'idempotency_key' => $data['idempotency_key'],
+        ]);
 
         return response()->json([
             'success' => true,
             'data' => $payment,
             'booking' => $booking->fresh(),
         ]);
+    }
+
+    public function cancel(Request $request, string $id)
+    {
+        $booking = Booking::where('user_id', $request->user()->id)->findOrFail($id);
+
+        abort_if(in_array($booking->status, ['cancelled', 'completed'], true), 422, 'This booking cannot be cancelled.');
+        abort_if($booking->check_in->isPast(), 422, 'A booking that has already started cannot be cancelled.');
+
+        $booking->update(['status' => 'cancelled']);
+
+        return response()->json(['success' => true, 'data' => $booking->fresh()]);
     }
 }
