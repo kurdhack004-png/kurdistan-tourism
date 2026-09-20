@@ -12,7 +12,7 @@ class User extends Authenticatable
     use HasApiTokens, HasUuids, Notifiable;
 
     protected $fillable = [
-        'full_name', 'email', 'phone_number', 'password', 'role', 'preferred_lang',
+        'full_name', 'email', 'phone_number', 'password', 'role', 'preferred_lang', 'is_active',
     ];
 
     protected $hidden = ['password', 'remember_token'];
@@ -20,7 +20,7 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'password' => 'hashed', // Laravel hashes with bcrypt/argon2id automatically
+            'password' => 'hashed',
             'is_active' => 'boolean',
         ];
     }
