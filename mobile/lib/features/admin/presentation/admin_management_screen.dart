@@ -167,7 +167,7 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen>
                     await api.patch('/admin/locations/${item['id']}', data: payload);
                   }
                   if (!mounted) return;
-                  Navigator.pop(context);
+                  Navigator.of(context).pop();
                   _message('admin_saved'.tr());
                   await _refresh();
                 } catch (_) {
@@ -244,10 +244,13 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen>
                 };
                 try {
                   final api = ref.read(apiClientProvider).client;
-                  if (item == null) await api.post('/admin/accommodations', data: payload);
-                  else await api.patch('/admin/accommodations/${item['id']}', data: payload);
+                  if (item == null) {
+                    await api.post('/admin/accommodations', data: payload);
+                  } else {
+                    await api.patch('/admin/accommodations/${item['id']}', data: payload);
+                  }
                   if (!mounted) return;
-                  Navigator.pop(context);
+                  Navigator.of(context).pop();
                   _message('admin_saved'.tr());
                   await _refresh();
                 } catch (_) { _message('admin_save_failed'.tr(), error: true); }
@@ -308,8 +311,11 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen>
               };
               try {
                 final api = ref.read(apiClientProvider).client;
-                if (item == null) await api.post('/admin/ads', data: payload);
-                else await api.patch('/admin/ads/${item['id']}', data: payload);
+                if (item == null) {
+                  await api.post('/admin/ads', data: payload);
+                } else {
+                  await api.patch('/admin/ads/${item['id']}', data: payload);
+                }
                 if (!mounted) return;
                 Navigator.pop(context);
                 _message('admin_saved'.tr());
@@ -383,9 +389,8 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen>
         children: [
           Align(alignment: AlignmentDirectional.centerEnd, child: FilledButton.icon(onPressed: add, icon: const Icon(Icons.add), label: Text('admin_add'.tr()))),
           const SizedBox(height: 12),
-          if (items.isEmpty) {
-            Center(child: Padding(padding: const EdgeInsets.all(32), child: Text('admin_empty'.tr())))
-          },
+          if (items.isEmpty)
+            Center(child: Padding(padding: const EdgeInsets.all(32), child: Text('admin_empty'.tr()))),
           ...items.map(card),
         ],
       ),
