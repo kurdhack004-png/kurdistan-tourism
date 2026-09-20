@@ -19,7 +19,7 @@ class _MainShellState extends State<MainShell> {
   @override
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
-    final screens = const [
+    const screens = [
       HomeScreen(),
       LocationsMapScreen(),
       FavoritesScreen(),
