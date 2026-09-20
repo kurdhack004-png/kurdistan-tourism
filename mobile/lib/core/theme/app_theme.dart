@@ -96,5 +96,17 @@ class AppTheme {
           ),
         ),
         dividerTheme: const DividerThemeData(color: Color(0xFF3A4A40), thickness: 0.5),
+        navigationBarTheme: const NavigationBarThemeData(
+          backgroundColor: AppColors.ink,
+          indicatorColor: AppColors.saffron,
+          labelTextStyle: WidgetStatePropertyAll(
+            TextStyle(color: AppColors.limestoneWhite, fontWeight: FontWeight.w600),
+          ),
+        ),
+        drawerTheme: const DrawerThemeData(backgroundColor: AppColors.ink),
+        listTileTheme: const ListTileThemeData(
+          textColor: AppColors.limestoneWhite,
+          iconColor: AppColors.limestoneWhite,
+        ),
       );
 }
