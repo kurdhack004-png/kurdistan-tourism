@@ -126,5 +126,16 @@
   "status_pending": "قيد الانتظار",
   "status_confirmed": "مؤكد",
   "status_cancelled": "ملغى",
-  "status_completed": "مكتمل"
+  "status_completed": "مكتمل",
+  "admin_panel": "لوحة الإدارة",
+  "admin_dashboard": "لوحة تحكم الإدارة",
+  "admin_dashboard_hint": "إدارة الأماكن والإقامة والحجوزات والمستخدمين والمراجعات والإعلانات",
+  "admin_only": "هذا القسم مخصص للمشرف فقط",
+  "admin_load_failed": "تعذر تحميل بيانات الإدارة",
+  "admin_places": "الأماكن السياحية",
+  "admin_accommodations": "أماكن الإقامة",
+  "admin_bookings": "الحجوزات",
+  "admin_users": "المستخدمون",
+  "admin_reviews": "المراجعات",
+  "admin_ads": "الإعلانات"
 }
