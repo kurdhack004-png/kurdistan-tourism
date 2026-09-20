@@ -6,10 +6,15 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\FavoriteController;
 use App\Http\Controllers\Api\LocationController;
+use App\Http\Controllers\Api\PaymentWebhookController;
 use App\Http\Controllers\Api\ReviewController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/health', fn () => response()->json(['success' => true, 'status' => 'online', 'version' => '10.0']));
+Route::get('/health', fn () => response()->json(['success' => true, 'status' => 'online', 'version' => '10.1']));
+
+// Provider callbacks are authenticated by the webhook signature, not Sanctum.
+Route::post('/payments/webhook', [PaymentWebhookController::class, 'handle'])
+    ->middleware('throttle:120,1');
 
 Route::middleware('throttle:10,1')->group(function () {
     Route::post('/auth/register', [AuthController::class, 'register']);
@@ -53,13 +58,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/bookings', [AdminController::class, 'bookings']);
         Route::patch('/bookings/{id}', [AdminController::class, 'updateBooking']);
-
         Route::get('/users', [AdminController::class, 'users']);
         Route::patch('/users/{id}', [AdminController::class, 'updateUser']);
-
         Route::get('/reviews', [AdminController::class, 'reviews']);
         Route::delete('/reviews/{id}', [AdminController::class, 'deleteReview']);
-
         Route::get('/ads', [AdminController::class, 'ads']);
         Route::post('/ads', [AdminController::class, 'storeAd']);
         Route::patch('/ads/{id}', [AdminController::class, 'updateAd']);
