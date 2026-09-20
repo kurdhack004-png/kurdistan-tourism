@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_colors.dart';
@@ -57,7 +58,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       appBar: AppBar(
         backgroundColor: AppColors.ink,
         foregroundColor: AppColors.limestoneWhite,
-        title: const Text('تۆمارکردنی هەژمار'),
+        title: const Text('register'.tr()),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -70,7 +71,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 const Icon(Icons.person_add_alt_1_rounded, size: 48, color: AppColors.saffron),
                 const SizedBox(height: AppSpacing.md),
                 const Text(
-                  'هەژمارێکی نوێ دروست بکە',
+                  'create_account'.tr(),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: AppColors.limestoneWhite,
@@ -81,39 +82,39 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 const SizedBox(height: AppSpacing.xl),
                 _RegisterField(
                   controller: _nameController,
-                  hint: 'ناوی تەواو',
+                  hint: 'full_name'.tr(),
                   validator: (value) => value == null || value.trim().isEmpty
-                      ? 'تکایە ناوی تەواو بنووسە'
+                      ? 'required_name'.tr()
                       : null,
                 ),
                 const SizedBox(height: AppSpacing.md),
                 _RegisterField(
                   controller: _emailController,
-                  hint: 'ئیمەیل',
+                  hint: 'email'.tr(),
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
                     final email = value?.trim() ?? '';
                     return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email)
                         ? null
-                        : 'تکایە ئیمەیلی دروست بنووسە';
+                        : 'valid_email'.tr();
                   },
                 ),
                 const SizedBox(height: AppSpacing.md),
                 _RegisterField(
                   controller: _passwordController,
-                  hint: 'وشەی نهێنی، لانیکەم ١٠ پیت',
+                  hint: 'password_min'.tr(),
                   obscureText: true,
                   validator: (value) => (value?.length ?? 0) < 10
-                      ? 'وشەی نهێنی دەبێت لانیکەم ١٠ پیت بێت'
+                      ? 'password_short'.tr()
                       : null,
                 ),
                 const SizedBox(height: AppSpacing.md),
                 _RegisterField(
                   controller: _confirmController,
-                  hint: 'دووبارەکردنەوەی وشەی نهێنی',
+                  hint: 'confirm_password'.tr(),
                   obscureText: true,
                   validator: (value) => value != _passwordController.text
-                      ? 'وشەی نهێنی یەکسان نییە'
+                      ? 'password_mismatch'.tr()
                       : null,
                 ),
                 const SizedBox(height: AppSpacing.lg),
