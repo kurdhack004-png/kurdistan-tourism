@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AccommodationController;
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookingController;
+use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\FavoriteController;
 use App\Http\Controllers\Api\HealthController;
 use App\Http\Controllers\Api\LocationController;
@@ -13,7 +14,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/health', HealthController::class);
 
-// Provider callbacks are authenticated by the webhook signature, not Sanctum.
 Route::post('/payments/webhook', [PaymentWebhookController::class, 'handle'])
     ->middleware('throttle:120,1');
 
@@ -45,6 +45,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/favorites/{type}/{id}', [FavoriteController::class, 'destroy']);
 
     Route::middleware('role:admin')->prefix('admin')->group(function () {
+        Route::get('/dashboard', DashboardController::class);
         Route::get('/locations', [AdminController::class, 'locations']);
         Route::post('/locations', [AdminController::class, 'storeLocation']);
         Route::patch('/locations/{id}', [AdminController::class, 'updateLocation']);
