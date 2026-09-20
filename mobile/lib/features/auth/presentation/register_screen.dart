@@ -73,7 +73,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 Text(
                   'create_account'.tr(),
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: AppColors.limestoneWhite,
                     fontSize: 22,
                     fontWeight: FontWeight.w700,
