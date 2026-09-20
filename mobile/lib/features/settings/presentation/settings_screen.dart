@@ -65,7 +65,7 @@ class SettingsScreen extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
-          const _SectionCard(
+          _SectionCard(
             children: [
               ListTile(title: Text('terms'.tr())),
               ListTile(title: Text('privacy'.tr())),
