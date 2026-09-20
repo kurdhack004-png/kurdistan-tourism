@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -59,8 +60,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     children: [
                       const Icon(Icons.terrain_rounded, size: 48, color: AppColors.saffron),
                       const SizedBox(height: AppSpacing.md),
-                      const Text(
-                        'چوونەژوورەوە',
+                      Text(
+                        'login'.tr(),
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: AppColors.limestoneWhite,
@@ -71,17 +72,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       const SizedBox(height: AppSpacing.xl),
                       _DarkField(
                         controller: _emailCtrl,
-                        hint: 'ئیمەیل',
+                        hint: 'email'.tr(),
                         keyboardType: TextInputType.emailAddress,
                       ),
                       const SizedBox(height: AppSpacing.md),
-                      _DarkField(controller: _passCtrl, hint: 'وشەی نهێنی', obscure: true),
+                      _DarkField(controller: _passCtrl, hint: 'password'.tr(), obscure: true),
                       const SizedBox(height: AppSpacing.lg),
                       if (auth.error != null)
                         Padding(
                           padding: const EdgeInsets.only(bottom: AppSpacing.md),
                           child: Text(
-                            auth.error!,
+                            auth.error!.tr(),
                             style: const TextStyle(color: Color(0xFFE38E7E), fontSize: 13),
                           ),
                         ),
@@ -102,8 +103,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       TextButton(
                         onPressed: () => Navigator.of(context)
                             .push(MaterialPageRoute(builder: (_) => const RegisterScreen())),
-                        child: const Text(
-                          'هەژمارت نییە؟ خۆت تۆمار بکە',
+                        child: Text(
+                          'no_account_register'.tr(),
                           style: TextStyle(color: AppColors.riverstone, fontSize: 13),
                         ),
                       ),
