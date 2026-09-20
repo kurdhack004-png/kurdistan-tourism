@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -27,7 +28,7 @@ class NotificationsScreen extends ConsumerWidget {
     final remote = ref.watch(notificationsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('ئاگادارکردنەوەکان')),
+      appBar: AppBar(title: Text('notifications'.tr())),
       body: remote.when(
         loading: () => const Center(child: CircularProgressIndicator(color: AppColors.saffron)),
         // The provider never throws (it returns null when offline), but keep
@@ -37,7 +38,7 @@ class NotificationsScreen extends ConsumerWidget {
           if (items == null) return _list(context, _offlineItems);
           if (items.isEmpty) {
             return Center(
-              child: Text('هیچ ئاگادارکردنەوەیەک نییە', style: Theme.of(context).textTheme.bodyMedium),
+              child: Text('no_notifications'.tr(), style: Theme.of(context).textTheme.bodyMedium),
             );
           }
           return _list(
