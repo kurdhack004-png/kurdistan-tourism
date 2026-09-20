@@ -114,5 +114,17 @@
   "cabin": "کابین",
   "chalet": "شالێ",
   "guesthouse": "میوانخانە",
-  "per_night_label": "/شەو"
+  "per_night_label": "/شەو",
+  "favorites_empty": "هێشتا هیچ شوێنێکت دڵخواز نەکردووە.",
+  "favorites_load_failed": "نەتوانرا دڵخوازەکان باربکرێن.",
+  "review_title": "ڕیڤیوی {title}",
+  "reviews_load_failed": "نەتوانرا ڕیڤیوەکان بار بکرێن",
+  "booking_guests_summary": "{name} • {guests} میوان",
+  "bookings_empty": "هێشتا هیچ حجزێکت نییە.",
+  "bookings_load_failed": "نەتوانرا حجزەکان بار بکرێن",
+  "booking_dates_guests": "{checkIn} → {checkOut} • {guests} میوان",
+  "status_pending": "چاوەڕوان",
+  "status_confirmed": "پشتڕاستکراوە",
+  "status_cancelled": "هەڵوەشێنراوە",
+  "status_completed": "تەواوبووە"
 }
