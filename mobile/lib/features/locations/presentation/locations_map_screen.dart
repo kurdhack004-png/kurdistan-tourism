@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
@@ -96,7 +97,7 @@ class _LocationsMapScreenState extends ConsumerState<LocationsMapScreen> {
     );
 
     return Scaffold(
-      appBar: AppBar(title: const Text('شوێنە گەشتیارییەکان')),
+      appBar: AppBar(title: Text('tourism_places'.tr())),
       body: nearby.when(
         data: (items) {
           _locations = items;
@@ -128,7 +129,7 @@ class _LocationsMapScreenState extends ConsumerState<LocationsMapScreen> {
                       FloatingActionButton.small(
                         heroTag: 'my-location',
                         onPressed: _locating ? null : _resolveCurrentPosition,
-                        tooltip: 'شوێنی من',
+                        tooltip: 'my_location'.tr(),
                         child: _locating
                             ? const SizedBox(
                                 width: 18,
@@ -142,7 +143,7 @@ class _LocationsMapScreenState extends ConsumerState<LocationsMapScreen> {
                         FloatingActionButton.small(
                           heroTag: 'directions',
                           onPressed: () => _openDirections(widget.focusLocation!),
-                          tooltip: 'ڕێنمایی',
+                          tooltip: 'directions'.tr(),
                           child: const Icon(Icons.directions_rounded),
                         ),
                     ],
@@ -173,12 +174,12 @@ class _LocationsMapScreenState extends ConsumerState<LocationsMapScreen> {
                           ),
                           if (items.isNotEmpty)
                             IconButton(
-                              tooltip: 'ڕێنمایی بۆ یەکەم شوێن',
+                              tooltip: 'directions'.tr(),
                               onPressed: () => _openDirections(items.first),
                               icon: const Icon(Icons.directions_rounded),
                             ),
                           IconButton(
-                            tooltip: 'وردەکاری',
+                            tooltip: 'details'.tr(),
                             onPressed: items.isEmpty
                                 ? null
                                 : () => _openLocation(items.first),
