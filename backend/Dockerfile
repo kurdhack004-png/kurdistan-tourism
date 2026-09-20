@@ -17,8 +17,8 @@ RUN composer create-project laravel/laravel:^11.0 /tmp/laravel --no-interaction 
     && cd /tmp/laravel \
     && php artisan install:api --no-interaction
 
-COPY composer.json /tmp/kurdistan/composer.json
-RUN cp /tmp/kurdistan/composer.json /tmp/laravel/composer.json \
+COPY composer.json /tmp/composer.json
+RUN cp /tmp/composer.json /tmp/laravel/composer.json \
     && cd /tmp/laravel \
     && composer install --no-interaction --no-dev --prefer-dist --optimize-autoloader
 
