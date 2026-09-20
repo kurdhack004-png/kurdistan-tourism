@@ -107,5 +107,12 @@
   "hotels": "Hotels & stays",
   "booking_fee": "Booking fee",
   "service_fee": "Service fee",
-  "pending_payment": "Payment is still pending."
+  "pending_payment": "Payment is still pending.",
+  "accommodation_load_failed": "Could not load accommodation",
+  "hotel": "Hotel",
+  "house": "House",
+  "cabin": "Cabin",
+  "chalet": "Chalet",
+  "guesthouse": "Guesthouse",
+  "per_night_label": "/ night"
 }
