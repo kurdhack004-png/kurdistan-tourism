@@ -278,7 +278,7 @@ class _HeroState extends ConsumerState<_Hero> {
                       AnimatedSwitcher(
                         duration: const Duration(milliseconds: 500),
                         child: Text(
-                          label,
+                          label.tr(),
                           key: ValueKey(label),
                           style: const TextStyle(color: AppColors.saffron, fontSize: 12, fontWeight: FontWeight.w600),
                         ),
