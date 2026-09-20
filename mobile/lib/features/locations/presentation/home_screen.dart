@@ -251,7 +251,7 @@ class _HeroState extends ConsumerState<_Hero> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text('app_slogan'.tr(),
-                        style: TextStyle(color: AppColors.limestoneWhite, fontSize: 14, fontWeight: FontWeight.w500)),
+                        style: const TextStyle(color: AppColors.limestoneWhite, fontSize: 14, fontWeight: FontWeight.w500)),
                     Row(
                       children: [
                         IconButton(
@@ -398,7 +398,7 @@ class _AdCard extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                   decoration: BoxDecoration(color: AppColors.saffron, borderRadius: BorderRadius.circular(6)),
-                  child: Text('ad'.tr(), style: TextStyle(fontSize: 10, color: AppColors.ink, fontWeight: FontWeight.w600)),
+                  child: Text('ad'.tr(), style: const TextStyle(fontSize: 10, color: AppColors.ink, fontWeight: FontWeight.w600)),
                 ),
               ),
               PositionedDirectional(
