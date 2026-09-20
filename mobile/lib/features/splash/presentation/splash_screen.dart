@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../shell/main_shell.dart';
@@ -33,7 +34,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       backgroundColor: AppColors.ink,
       body: Center(
         child: Column(
@@ -42,7 +43,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
             Icon(Icons.terrain_rounded, size: 56, color: AppColors.saffron),
             SizedBox(height: 16),
             Text(
-              'گەشتیاری کوردستان',
+              'app_name'.tr(),
               style: TextStyle(
                 color: AppColors.limestoneWhite,
                 fontSize: 18,
