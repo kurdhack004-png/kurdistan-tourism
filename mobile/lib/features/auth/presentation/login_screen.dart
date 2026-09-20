@@ -97,7 +97,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   color: AppColors.inkDeep,
                                 ),
                               )
-                            : const Text('چوونەژوورەوە'),
+                            : Text('login'.tr()),
                       ),
                       const SizedBox(height: AppSpacing.md),
                       TextButton(
@@ -105,7 +105,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             .push(MaterialPageRoute(builder: (_) => const RegisterScreen())),
                         child: Text(
                           'no_account_register'.tr(),
-                          style: TextStyle(color: AppColors.riverstone, fontSize: 13),
+                          style: const TextStyle(color: AppColors.riverstone, fontSize: 13),
                         ),
                       ),
                     ],
