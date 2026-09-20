@@ -14,7 +14,7 @@ class SettingsScreen extends ConsumerWidget {
     final notifier = ref.read(settingsProvider.notifier);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('ڕێکخستنەکان')),
+      appBar: AppBar(title: Text('settings'.tr())),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
@@ -23,19 +23,19 @@ class SettingsScreen extends ConsumerWidget {
               SwitchListTile(
                 value: settings.darkMode,
                 onChanged: notifier.setDarkMode,
-                title: const Text('دۆخی تاریک'),
+                title: const Text('dark_mode'.tr()),
                 secondary: const Icon(Icons.dark_mode_outlined),
               ),
               SwitchListTile(
                 value: settings.notificationsEnabled,
                 onChanged: notifier.setNotifications,
-                title: const Text('ئاگادارکردنەوەکان'),
+                title: const Text('notifications'.tr()),
                 secondary: const Icon(Icons.notifications_outlined),
               ),
               SwitchListTile(
                 value: settings.locationEnabled,
                 onChanged: notifier.setLocation,
-                title: const Text('خزمەتگوزاری شوێن (GPS)'),
+                title: const Text('location_gps'.tr()),
                 secondary: const Icon(Icons.location_on_outlined),
               ),
             ],
@@ -45,14 +45,14 @@ class SettingsScreen extends ConsumerWidget {
             children: [
               ListTile(
                 leading: const Icon(Icons.language_outlined),
-                title: const Text('زمان'),
+                title: const Text('language'.tr()),
                 trailing: DropdownButton<String>(
                   value: settings.language,
                   underline: const SizedBox.shrink(),
-                  items: const [
-                    DropdownMenuItem(value: 'ckb', child: Text('کوردی')),
-                    DropdownMenuItem(value: 'ar', child: Text('عەربی')),
-                    DropdownMenuItem(value: 'en', child: Text('English')),
+                  items: [
+                    DropdownMenuItem(value: 'ckb', child: Text('kurdish'.tr())),
+                    DropdownMenuItem(value: 'ar', child: Text('arabic'.tr())),
+                    DropdownMenuItem(value: 'en', child: Text('english'.tr())),
                   ],
                   onChanged: (v) {
                     if (v != null) {
@@ -67,9 +67,9 @@ class SettingsScreen extends ConsumerWidget {
           const SizedBox(height: AppSpacing.lg),
           const _SectionCard(
             children: [
-              ListTile(title: Text('مەرج و ڕێساکان')),
-              ListTile(title: Text('پارێزگاری تایبەتێتی')),
-              ListTile(title: Text('دەربارەی گەشتیاری کوردستان')),
+              ListTile(title: Text('terms'.tr())),
+              ListTile(title: Text('privacy'.tr())),
+              ListTile(title: Text('about'.tr())),
             ],
           ),
         ],
