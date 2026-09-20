@@ -31,10 +31,10 @@ class PaymentScreen extends ConsumerStatefulWidget {
 }
 
 const _methods = [
-  ('fib', 'FIB', Icons.account_balance_wallet_outlined),
-  ('visa', 'Visa / Master', Icons.credit_card_outlined),
-  ('cash', 'Cash on site', Icons.payments_outlined),
-  ('bank_transfer', 'Bank transfer', Icons.account_balance_outlined),
+  ('fib', 'fib', Icons.account_balance_wallet_outlined),
+  ('visa', 'card', Icons.credit_card_outlined),
+  ('cash', 'cash', Icons.payments_outlined),
+  ('bank_transfer', 'bank_transfer', Icons.account_balance_outlined),
 ];
 
 class _PaymentScreenState extends ConsumerState<PaymentScreen> {
@@ -104,7 +104,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
               margin: const EdgeInsets.only(bottom: AppSpacing.sm),
               child: ListTile(
                 leading: Icon(m.$3, color: AppColors.clay),
-                title: Text(m.$2),
+                title: Text(m.$2.tr()),
                 trailing: _submitting
                     ? const SizedBox(
                         width: 16,
@@ -117,8 +117,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
             ),
           const SizedBox(height: AppSpacing.lg),
           Text(
-            'Card details are never stored in the app. Real payment processing '
-            'must be handled by an authorized provider.',
+            'payment_note'.tr(),
             style: Theme.of(context).textTheme.bodyMedium,
           ),
         ],
