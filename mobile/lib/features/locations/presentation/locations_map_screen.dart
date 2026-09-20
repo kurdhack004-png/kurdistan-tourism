@@ -204,6 +204,7 @@ class _LocationsMapScreenState extends ConsumerState<LocationsMapScreen> {
     if (controller == null) return;
     final languageCode = context.locale.languageCode;
     try {
+      await controller.setMapLanguage(languageCode == 'ckb' ? 'ku' : languageCode);
       await controller.clearSymbols();
       for (final location in _locations) {
         await controller.addSymbol(
