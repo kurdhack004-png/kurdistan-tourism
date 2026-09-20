@@ -149,12 +149,12 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen>
             TextButton(onPressed: () => Navigator.pop(context), child: Text('cancel'.tr())),
             FilledButton(
               onPressed: () async {
-                if (nameCkb.text.trim().isEmpty || double.tryParse(lat.text) == null || double.tryParse(lng.text) == null) return;
+                if (nameCkb.text.trim().isEmpty) return;
                 final payload = {
                   'category': category,
                   'name_ckb': nameCkb.text.trim(), 'name_ar': nameAr.text.trim(), 'name_en': nameEn.text.trim(),
                   'description_ckb': descCkb.text.trim(), 'description_ar': descAr.text.trim(), 'description_en': descEn.text.trim(),
-                  'latitude': double.parse(lat.text), 'longitude': double.parse(lng.text),
+                  if (double.tryParse(lat.text) != null && double.tryParse(lng.text) != null) 'latitude': double.parse(lat.text), 'longitude': double.parse(lng.text),
                 };
                 try {
                   final api = ref.read(apiClientProvider).client;
@@ -226,14 +226,14 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen>
             TextButton(onPressed: () => Navigator.pop(context), child: Text('cancel'.tr())),
             FilledButton(
               onPressed: () async {
-                if (c['name_ckb']!.text.trim().isEmpty || double.tryParse(c['lat']!.text) == null || double.tryParse(c['lng']!.text) == null) return;
+                if (c['name_ckb']!.text.trim().isEmpty || (item == null && (double.tryParse(c['lat']!.text) == null || double.tryParse(c['lng']!.text) == null))) return;
                 final payload = {
                   'type': type,
                   'name_ckb': c['name_ckb']!.text.trim(), 'name_ar': c['name_ar']!.text.trim(), 'name_en': c['name_en']!.text.trim(),
                   'description_ckb': c['description_ckb']!.text.trim(), 'description_ar': c['description_ar']!.text.trim(), 'description_en': c['description_en']!.text.trim(),
                   'city_ckb': c['city_ckb']!.text.trim(), 'city_ar': c['city_ar']!.text.trim(), 'city_en': c['city_en']!.text.trim(),
                   'price_per_night': double.tryParse(c['price']!.text) ?? 0,
-                  'latitude': double.parse(c['lat']!.text), 'longitude': double.parse(c['lng']!.text),
+                  if (double.tryParse(c['lat']!.text) != null && double.tryParse(c['lng']!.text) != null) 'latitude': double.parse(c['lat']!.text), 'longitude': double.parse(c['lng']!.text),
                 };
                 try {
                   final api = ref.read(apiClientProvider).client;
