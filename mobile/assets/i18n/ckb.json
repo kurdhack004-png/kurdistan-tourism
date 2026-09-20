@@ -126,5 +126,16 @@
   "status_pending": "چاوەڕوان",
   "status_confirmed": "پشتڕاستکراوە",
   "status_cancelled": "هەڵوەشێنراوە",
-  "status_completed": "تەواوبووە"
+  "status_completed": "تەواوبووە",
+  "admin_panel": "بەڕێوەبردنی ئەدمین",
+  "admin_dashboard": "داشبۆردی ئەدمین",
+  "admin_dashboard_hint": "بەڕێوەبردنی شوێنەکان، مانەوە، حجزەکان، بەکارهێنەران، ڕیڤیوەکان و بانگەشەکان",
+  "admin_only": "ئەم بەشە تەنها بۆ ئەدمینە",
+  "admin_load_failed": "نەتوانرا داتاکانی ئەدمین بار بکرێن",
+  "admin_places": "شوێنە گەشتیارییەکان",
+  "admin_accommodations": "شوێنەکانی مانەوە",
+  "admin_bookings": "حجزەکان",
+  "admin_users": "بەکارهێنەران",
+  "admin_reviews": "ڕیڤیوەکان",
+  "admin_ads": "بانگەشەکان"
 }
