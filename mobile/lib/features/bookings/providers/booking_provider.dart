@@ -77,14 +77,16 @@ class BookingNotifier extends StateNotifier<AsyncValue<List<Booking>>> {
       await refresh();
       return booking;
     } catch (_) {
+      // Never manufacture a "confirmed" booking when the payment server is
+      // unavailable. Save it locally as pending so the user can retry later.
       final booking = Booking(
-        id: 'KT-${DateTime.now().millisecondsSinceEpoch}',
+        id: 'KT-PENDING-${DateTime.now().millisecondsSinceEpoch}',
         accommodationName: accommodationName,
         checkIn: checkIn,
         checkOut: checkOut,
         guests: guests,
         totalPrice: total,
-        status: 'confirmed',
+        status: 'pending_payment',
       );
       await _saveLocal(booking);
       state = AsyncValue.data(await _loadLocal());
