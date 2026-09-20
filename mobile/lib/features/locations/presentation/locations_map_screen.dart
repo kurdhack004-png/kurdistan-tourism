@@ -79,7 +79,7 @@ class _LocationsMapScreenState extends ConsumerState<LocationsMapScreen> {
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('نەتوانرا نەخشەی ڕێنمایی بکرێتەوە.')),
+        SnackBar(content: Text('map_open_failed'.tr())),
       );
     }
   }
@@ -163,7 +163,7 @@ class _LocationsMapScreenState extends ConsumerState<LocationsMapScreen> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              '${items.length} شوێنی گەشتیاری لەم ناوچەیەدا',
+                              'places_on_map'.tr(namedArgs: {'count': items.length.toString()}),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -190,9 +190,7 @@ class _LocationsMapScreenState extends ConsumerState<LocationsMapScreen> {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) => const Center(
-          child: Text('نەتوانرا داتای شوێنەکان بخوێندرێتەوە.'),
-        ),
+        error: (_, __) => Center(child: Text('data_load_failed'.tr())),
       ),
     );
   }
