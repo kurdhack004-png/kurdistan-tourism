@@ -29,7 +29,7 @@ void main() {
     final extra = keys.difference(base).toList()..sort();
     if (missing.isNotEmpty || extra.isNotEmpty) {
       failed = true;
-      stderr.writeln('${name}: missing=${missing.join(',')} extra=${extra.join(',')}');
+      stderr.writeln('$name: missing=${missing.join(',')} extra=${extra.join(',')}');
     }
   }
 
