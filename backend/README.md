@@ -1,74 +1,74 @@
-# Kurdistan Tourism API — v9 (Laravel + PostGIS)
+# Kurdistan Tourism API — v10 (Laravel + PostgreSQL/PostGIS)
 
-This is a starter skeleton that replaces the V8.1 PHP/MySQL backend with a
-production-oriented Laravel + PostgreSQL/PostGIS API. It is not a full
-implementation of all 64 V8.1 tables — it ports the highest-value core
-(auth, locations, trails, accommodations, bookings/payments, reviews,
-events, offline packages) and establishes the patterns (spatial columns,
-form-request validation, role middleware, rate limiting) to extend to the
-rest of the schema.
+This backend is a production-oriented foundation for the Kurdistan Tourism platform. It includes core patterns for authentication, locations, accommodations, bookings, payments, reviews, spatial queries, and admin operations.
 
-## Setup
+> **Production status:** this repository is not yet ready to accept real customer payments or public traffic without deployment configuration, provider credentials, webhook verification, security review, tests, and operational monitoring. No payment should be marked as successful merely because a client calls the payment endpoint.
+
+## Architecture
+
+- Laravel 11 API
+- PostgreSQL + PostGIS for spatial data and distance queries
+- Laravel Sanctum for token authentication
+- Role-based access: tourist, owner, guide, admin
+- Flutter mobile client under `mobile/`
+- Admin dashboard under `admin-dashboard/`
+- Deployment target: Render or another managed hosting provider
+
+## Core capabilities
+
+- Register, login, logout, and current-user profile
+- Locations with category, governorate, coordinates, verification, and nearby search
+- Accommodations with hotel/house/cabin/chalet types and availability checks
+- Booking creation with date-overlap protection and a 10,000 IQD booking fee
+- Idempotent payment-intent creation
+- Reviews and favorites
+- Admin management for locations, accommodations, users, bookings, reviews, ads, and media
+
+## Required before production launch
+
+1. Create a managed PostgreSQL database with PostGIS enabled.
+2. Configure all environment variables in the hosting provider; never commit `.env`, API keys, private keys, or payment secrets.
+3. Configure object storage for images and videos, with private upload handling and size/type validation.
+4. Integrate an approved payment provider (for example, FIB or a supported card provider) using its official server-side API.
+5. Implement and verify signed payment webhooks. The server must transition a payment to `paid` only after provider-side verification.
+6. Add payment states such as `pending`, `processing`, `paid`, `failed`, `expired`, and `refunded`, plus reconciliation handling.
+7. Add automated tests for authentication, authorization, booking overlap, price calculation, idempotency, webhook replay, and admin permissions.
+8. Configure HTTPS, CORS restrictions, rate limits, logging, backups, database migrations, and monitoring.
+9. Configure production map keys and restrictions through environment variables.
+10. Review privacy, terms, cancellation/refund rules, owner verification, and local payment/legal requirements before launch.
+
+## Local setup
 
 ```bash
-composer create-project laravel/laravel:^11.0 kurdistan-tourism-api
-cd kurdistan-tourism-api
-# copy the app/, database/, routes/, config/ files from this package
-# over the freshly generated project, then:
-
-composer require laravel/sanctum clickbar/laravel-magellan spatie/laravel-query-builder
-
+composer install
 cp .env.example .env
 php artisan key:generate
-
-# Create the Postgres database first, with the postgis extension available:
-#   createdb kurdistan_tourism_v9
 php artisan migrate
-
 php artisan serve
 ```
 
-## Why these choices over the V8.1 starter
+For PostgreSQL/PostGIS, create the database first and enable the PostGIS extension:
 
-- **PostgreSQL + PostGIS** instead of MySQL: `geography(Point,4326)` and
-  `geography(LineString,4326)` columns give native spatial indexing
-  (GiST) and distance queries (`ST_DWithin`, `<->` nearest-neighbor)
-  instead of manually comparing lat/lng floats.
-- **Laravel Sanctum** instead of a hand-rolled HMAC token: battle-tested,
-  supports token expiration, abilities, and revocation.
-- **Form Requests** per endpoint instead of a generic
-  `information_schema`-driven CRUD: real validation, no accidental
-  exposure of arbitrary tables/columns.
-- **Rate limiting** on auth endpoints (`throttle:10,1`) and a dedicated
-  login attempt limiter — the V8.1 starter had none.
-- **Role middleware** (`role:admin,guide`) instead of a single
-  `require_role()` helper function — composable per-route.
-- **Idempotency key** on payments to prevent double-charging on client
-  retries — not present in the V8.1 schema.
+```sql
+CREATE EXTENSION IF NOT EXISTS postgis;
+```
 
-## Next steps to extend
+## Payment safety rule
 
-1. Port the remaining V8.1 tables (mountain_details, cave_details,
-   water_systems, tags, translations, GIS layers, ...) following the
-   `locations`/`trails` migration pattern.
-2. Add `spatie/laravel-query-builder` filters/sorts to `LocationController`
-   for richer client-side querying without hand-writing each filter.
-3. Add a queued job for image processing (thumbnails, WebP conversion)
-   on media upload.
-4. Wire the FIB/Visa payment webhook handlers referenced in `payments`
-   — `BookingController::pay()` currently marks card payments 'paid'
-   immediately, which is only correct until you have a real webhook to
-   confirm the charge server-side.
-5. Add `php artisan test` coverage — none exists yet in this skeleton.
+The current `POST /bookings/{id}/pay` endpoint creates a **pending payment record** and supports idempotency. It must not be treated as proof of payment. Provider-specific checkout creation and a signed webhook handler must be added before enabling real-money transactions.
 
-## What's implemented (v10)
+## Recommended implementation order
 
-- `AuthController` — register/login/logout/me via Sanctum, with login
-  rate limiting.
-- `LocationController` — spatial nearby search, category/governorate
-  filters, submit-for-verification flow.
-- `AccommodationController` — spatial nearby search, type filter.
-- `BookingController` — create a booking, list the user's own bookings,
-  and an idempotent `pay()` endpoint.
-- `ReviewController` — polymorphic reviews for locations, accommodations,
-  or trails.
+1. Deploy PostgreSQL/PostGIS and run migrations.
+2. Configure Sanctum, roles, CORS, rate limiting, and production environment secrets.
+3. Complete owner/guide/admin authorization rules.
+4. Add real location and accommodation records through the admin API.
+5. Add secure object-storage uploads and media processing.
+6. Add provider-specific payment checkout and signed webhooks.
+7. Add automated tests and CI gates.
+8. Connect Flutter production API configuration.
+9. Perform staging acceptance tests, then publish the release APK.
+
+## Important limitation
+
+A real database, storage bucket, map key, and payment account cannot be created solely by changing source code. The required services must be provisioned by the project owner, and their credentials must be entered as protected environment variables in the deployment platform.
