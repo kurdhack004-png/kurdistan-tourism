@@ -20,9 +20,13 @@ class BookingConfirmationScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.check_circle_rounded, color: AppColors.clay, size: 84),
+                Icon(
+                  booking.status == 'pending_payment' ? Icons.schedule_rounded : Icons.check_circle_rounded,
+                  color: booking.status == 'pending_payment' ? AppColors.saffron : AppColors.clay,
+                  size: 84,
+                ),
                 const SizedBox(height: AppSpacing.lg),
-                Text('booking_confirmed'.tr(), style: Theme.of(context).textTheme.displayLarge,
+                Text(booking.status == 'pending_payment' ? 'offline_pending_payment'.tr() : 'booking_confirmed'.tr(), style: Theme.of(context).textTheme.displayLarge,
                     textAlign: TextAlign.center),
                 const SizedBox(height: AppSpacing.sm),
                 Text(
