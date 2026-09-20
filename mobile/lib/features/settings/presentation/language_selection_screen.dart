@@ -10,6 +10,7 @@ class LanguageSelectionScreen extends ConsumerWidget {
 
   Future<void> _select(BuildContext context, WidgetRef ref, String code) async {
     await ref.read(settingsProvider.notifier).setLanguage(code);
+    if (!context.mounted) return;
     await context.setLocale(Locale(code));
     if (!context.mounted) return;
     Navigator.of(context).pushReplacement(
