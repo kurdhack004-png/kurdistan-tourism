@@ -28,7 +28,9 @@ class BookingController extends Controller
         $accommodation = Accommodation::findOrFail($data['accommodation_id']);
 
         $nights = max(1, \Carbon\Carbon::parse($data['check_in'])->diffInDays($data['check_out']));
-        $total = $nights * (float) $accommodation->price_per_night;
+        // Product rule: 10,000 IQD booking service fee per accommodation booking.
+        $bookingFee = 10000;
+        $total = $nights * (float) $accommodation->price_per_night + $bookingFee;
 
         $booking = Booking::create([
             ...$data,
@@ -62,16 +64,17 @@ class BookingController extends Controller
                 'booking_id' => $booking->id,
                 'method' => $data['method'],
                 'amount' => $booking->total_price,
-                // Cash/bank transfer are confirmed on-site/manually; card
-                // methods would normally go 'pending' until a webhook from
-                // FIB/Visa confirms the charge — wire that webhook before
-                // treating this as real payment confirmation in production.
-                'status' => in_array($data['method'], ['cash', 'bank_transfer']) ? 'pending' : 'paid',
+                // No payment provider webhook is wired in this repository yet.
+                // Never report money as paid merely because the client called
+                // this endpoint. A provider callback/admin action must confirm it.
+                'status' => 'pending',
             ],
         );
 
-        $booking->update(['status' => 'confirmed']);
-
-        return response()->json(['success' => true, 'data' => $payment]);
+        return response()->json([
+            'success' => true,
+            'data' => $payment,
+            'booking' => $booking->fresh(),
+        ]);
     }
 }
