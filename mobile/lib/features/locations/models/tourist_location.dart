@@ -1,3 +1,11 @@
+String? _firstText(List<dynamic> values) {
+  for (final v in values) {
+    final s = v?.toString().trim() ?? '';
+    if (s.isNotEmpty) return s;
+  }
+  return null;
+}
+
 class TouristLocation {
   const TouristLocation({
     required this.id, required this.category, required this.nameCkb,
@@ -23,15 +31,17 @@ class TouristLocation {
     lat ??= (json['lat'] as num?)?.toDouble() ?? (json['latitude'] as num?)?.toDouble();
     lng ??= (json['lng'] as num?)?.toDouble() ?? (json['longitude'] as num?)?.toDouble();
     if (lat == null || lng == null) throw const FormatException('Location coordinates missing');
+    var image = _firstText([json['image'], json['image_url']]);
+    if (image == null && json['images'] is List) image = _firstText(json['images'] as List);
     return TouristLocation(
       id: json['id'].toString(),
       category: (json['category'] ?? 'other').toString(),
-      nameCkb: (json['name_ckb'] ?? json['name'] ?? 'شوێنی گەشتیاری').toString(),
+      nameCkb: _firstText([json['name_ckb'], json['name_ku'], json['name']]) ?? 'شوێنی گەشتیاری',
       longitude: lng, latitude: lat,
       elevationMeters: (json['elevation_meters'] as num?)?.toInt(),
-      descriptionCkb: (json['description_ckb'] ?? json['description'])?.toString(),
+      descriptionCkb: _firstText([json['description_ckb'], json['description_ku'], json['description']]),
       rating: (json['rating'] as num?)?.toDouble(),
-      imageUrl: (json['image'] ?? json['image_url'])?.toString(),
+      imageUrl: image,
     );
   }
 }

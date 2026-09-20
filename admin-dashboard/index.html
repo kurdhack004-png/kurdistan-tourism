@@ -130,6 +130,7 @@ const $=(s,r=document)=>r.querySelector(s);
 function h(tag,attrs,...kids){const e=document.createElement(tag);for(const[k,v]of Object.entries(attrs||{})){if(v===false||v==null)continue;if(k==='class')e.className=v;else if(k.startsWith('on'))e.addEventListener(k.slice(2),v);else if(k==='value')e.value=v;else e.setAttribute(k,v===true?'':v)}
   for(const c of kids.flat(9)){if(c==null||c===false)continue;e.append(c.nodeType?c:document.createTextNode(String(c)))}return e}
 const safeUrl=u=>/^(https?:\/\/[^\s]+|\/uploads\/[\w.\-]+)$/.test(u||'')?u:'';
+const imgSrc=u=>{u=safeUrl(u);return u.startsWith('/uploads/')?API.replace(/\/api$/,'')+u:u};
 const fmtNum=n=>new Intl.NumberFormat('en-US').format(Math.round(Number(n)||0));
 const fmtDate=s=>s?new Date(s).toLocaleString():'';
 const toLocalInput=s=>{if(!s)return'';const d=new Date(s),p=n=>String(n).padStart(2,'0');return`${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`};
@@ -182,7 +183,7 @@ const RES={
 /* ============================== table + form ============================== */
 function cell(col,row){
   const[k,type]=col,v=row[k];
-  if(type==='img'){const u=safeUrl(v);return u?h('img',{class:'thumb',src:u,alt:'',loading:'lazy'}):h('div',{class:'thumb'})}
+  if(type==='img'){const u=imgSrc(v);return u?h('img',{class:'thumb',src:u,alt:'',loading:'lazy'}):h('div',{class:'thumb'})}
   if(type==='bool')return h('span',{class:'pill '+(v?'ok':'no')},v?'✔':'✕');
   if(type==='enum')return t('o_'+v);
   if(type==='date')return fmtDate(v);
@@ -199,7 +200,7 @@ function table(cols,rows,actionsFn,labelFn){
 function imageField(f,val){
   const state={v:val||''};const prev=h('div',{class:'imgs'});const inp=h('input',{class:'input',dir:'ltr',placeholder:'https://…',value:state.v});
   const file=h('input',{type:'file',accept:'image/jpeg,image/png,image/webp,image/gif',class:'hidden'});
-  const draw=()=>{prev.replaceChildren();const u=safeUrl(state.v);if(u)prev.append(h('div',{class:'im'},h('img',{src:u,alt:''})))};
+  const draw=()=>{prev.replaceChildren();const u=imgSrc(state.v);if(u)prev.append(h('div',{class:'im'},h('img',{src:u,alt:''})))};
   inp.addEventListener('input',()=>{state.v=inp.value.trim();draw()});
   file.addEventListener('change',()=>run(async()=>{if(!file.files[0])return;const u=await uploadFile(file.files[0]);state.v=u;inp.value=u;draw()}));
   draw();
@@ -209,7 +210,7 @@ function imageField(f,val){
 function imagesField(f,val){
   const list=Array.isArray(val)?[...val]:[];const prev=h('div',{class:'imgs'});const inp=h('input',{class:'input',dir:'ltr',placeholder:'https://…'});
   const file=h('input',{type:'file',accept:'image/jpeg,image/png,image/webp,image/gif',multiple:true,class:'hidden'});
-  const draw=()=>{prev.replaceChildren(...list.map((u,i)=>h('div',{class:'im'},h('img',{src:safeUrl(u),alt:''}),h('button',{type:'button',title:t('remove'),onclick:()=>{list.splice(i,1);draw()}},'×'))))};
+  const draw=()=>{prev.replaceChildren(...list.map((u,i)=>h('div',{class:'im'},h('img',{src:imgSrc(u),alt:''}),h('button',{type:'button',title:t('remove'),onclick:()=>{list.splice(i,1);draw()}},'×'))))};
   file.addEventListener('change',()=>run(async()=>{for(const fl of file.files){list.push(await uploadFile(fl));draw()}file.value=''}));
   draw();
   const el=h('div',null,prev,h('div',{style:'display:flex;gap:6px'},inp,h('button',{type:'button',class:'btn sm ghost',onclick:()=>{const u=inp.value.trim();if(safeUrl(u)){list.push(u);inp.value='';draw()}}},t('add_url'))),

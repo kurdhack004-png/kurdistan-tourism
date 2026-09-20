@@ -149,6 +149,24 @@ module.exports = function registerAdmin(app, db, { auth, admin, now, randomUUID,
   });
   setInterval(() => { for (const [k, e] of fails) if (Date.now() - e.t >= WINDOW) fails.delete(k); }, WINDOW).unref();
 
+  /* ------------------------------------------------------------------ uploaded images: relative in the DB, absolute in public API responses */
+  // Admin stores "/uploads/<file>". The phone app must reach the server on the address IT uses (LAN IP / domain),
+  // not the one the admin happened to use (e.g. localhost), so public responses are expanded per request.
+  const UPLOAD_PATH_RE = /^\/uploads\/[\w.\-]+$/;
+  const absolutize = (v, base) => {
+    if (typeof v === 'string') return UPLOAD_PATH_RE.test(v) ? base + v : v;
+    if (Array.isArray(v)) return v.map(i => absolutize(i, base));
+    if (v && typeof v === 'object') { const o = {}; for (const k of Object.keys(v)) o[k] = absolutize(v[k], base); return o; }
+    return v;
+  };
+  app.use('/api', (req, res, next) => {
+    if (req.path.startsWith('/admin')) return next();
+    const base = (process.env.PUBLIC_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+    const json = res.json.bind(res);
+    res.json = (body) => json(absolutize(body, base));
+    next();
+  });
+
   /* ------------------------------------------------------------------ static: dashboard + uploads */
   const UPLOAD_DIR = process.env.UPLOAD_DIR ? path.resolve(process.env.UPLOAD_DIR) : path.join(__dirname, '..', 'uploads');
   fs.mkdirSync(UPLOAD_DIR, { recursive: true });
@@ -370,8 +388,7 @@ module.exports = function registerAdmin(app, db, { auth, admin, now, randomUUID,
     if (!ext) return fail(res, 415, 'Only JPG, PNG, GIF and WEBP images are allowed');
     const name = `${randomUUID()}.${ext}`;
     fs.writeFileSync(path.join(UPLOAD_DIR, name), buf);
-    const base = (process.env.PUBLIC_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
-    ok(res, { url: `${base}/uploads/${name}` });
+    ok(res, { url: `/uploads/${name}` });
   });
 
   /* ------------------------------------------------------------------ public endpoints for the mobile app */

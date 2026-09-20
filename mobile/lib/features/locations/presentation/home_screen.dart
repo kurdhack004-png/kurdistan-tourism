@@ -1,12 +1,15 @@
 import 'dart:async';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/category_visual.dart';
 import '../../../core/widgets/mountain_ridge_divider.dart';
 import '../../../core/widgets/safe_build.dart';
+import '../../content/providers/content_provider.dart';
 import '../../emergency/presentation/emergency_screen.dart';
 import '../../notifications/presentation/notifications_screen.dart';
 import '../providers/locations_provider.dart';
@@ -52,6 +55,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           SliverToBoxAdapter(
             child: MountainRidgeDivider(color: Theme.of(context).scaffoldBackgroundColor),
           ),
+          const SliverToBoxAdapter(child: _AdBanner()),
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
             sliver: SliverToBoxAdapter(
@@ -134,27 +138,34 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 }
 
-class _Hero extends StatefulWidget {
+class _Hero extends ConsumerStatefulWidget {
   const _Hero({this.count});
   final int? count;
 
   @override
-  State<_Hero> createState() => _HeroState();
+  ConsumerState<_Hero> createState() => _HeroState();
 }
 
-class _HeroState extends State<_Hero> {
+class _HeroState extends ConsumerState<_Hero> {
   int _slideIndex = 0;
+  int _slideCount = _heroSlides.length;
+  int _intervalSec = 5;
   Timer? _timer;
 
   @override
   void initState() {
     super.initState();
-    // Cycle to the next of the 5 hero scenes every 5 seconds. The timer
-    // is cancelled in dispose(), so it never fires after this widget
-    // (and its BuildContext) is gone.
-    _timer = Timer.periodic(const Duration(seconds: 5), (_) {
-      if (!mounted) return;
-      setState(() => _slideIndex = (_slideIndex + 1) % _heroSlides.length);
+    _startTimer();
+  }
+
+  // Cycles to the next slide every `_intervalSec` seconds (5 by default,
+  // configurable from the admin dashboard). The timer is cancelled in
+  // dispose(), so it never fires after this widget is gone.
+  void _startTimer() {
+    _timer?.cancel();
+    _timer = Timer.periodic(Duration(seconds: _intervalSec), (_) {
+      if (!mounted || _slideCount < 2) return;
+      setState(() => _slideIndex = (_slideIndex + 1) % _slideCount);
     });
   }
 
@@ -166,7 +177,19 @@ class _HeroState extends State<_Hero> {
 
   @override
   Widget build(BuildContext context) {
-    final (category, label) = _heroSlides[_slideIndex];
+    // Images come from the admin dashboard. With no images (or offline) the
+    // 5 built-in category scenes are shown instead.
+    final hero = ref.watch(heroProvider).value;
+    final images = hero?.images ?? const <String>[];
+    final useImages = images.isNotEmpty;
+    _slideCount = useImages ? images.length : _heroSlides.length;
+    final wantedInterval = hero?.intervalSec ?? 5;
+    if (wantedInterval != _intervalSec) {
+      _intervalSec = wantedInterval;
+      _startTimer();
+    }
+    final index = _slideIndex % _slideCount;
+    final (category, label) = _heroSlides[index % _heroSlides.length];
     final (icon, tint) = categoryVisual(category);
 
     return Container(
@@ -176,24 +199,34 @@ class _HeroState extends State<_Hero> {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          // Rotating background: cross-fades between 5 scenes every 5s.
+          // Rotating background: cross-fades between the slides.
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 700),
-            child: Container(
-              key: ValueKey(category),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [tint.withValues(alpha: 0.9), AppColors.ink],
-                ),
-              ),
-              alignment: Alignment.centerRight,
-              child: Padding(
-                padding: const EdgeInsets.only(right: AppSpacing.lg),
-                child: Icon(icon, size: 96, color: Colors.white.withValues(alpha: 0.18)),
-              ),
-            ),
+            child: useImages
+                ? SizedBox.expand(
+                    key: ValueKey('hero-image-$index-${images[index]}'),
+                    child: CachedNetworkImage(
+                      imageUrl: images[index],
+                      fit: BoxFit.cover,
+                      placeholder: (_, __) => const ColoredBox(color: AppColors.ink),
+                      errorWidget: (_, __, ___) => const ColoredBox(color: AppColors.ink),
+                    ),
+                  )
+                : Container(
+                    key: ValueKey(category),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [tint.withValues(alpha: 0.9), AppColors.ink],
+                      ),
+                    ),
+                    alignment: Alignment.centerRight,
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: AppSpacing.lg),
+                      child: Icon(icon, size: 96, color: Colors.white.withValues(alpha: 0.18)),
+                    ),
+                  ),
           ),
           // Readability scrim over the image so text stays legible on
           // every one of the 5 tints.
@@ -240,15 +273,17 @@ class _HeroState extends State<_Hero> {
                     // fixed screen title, so the banner clearly reads as
                     // "showcasing different things" rather than the
                     // title itself changing underneath the user.
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 500),
-                      child: Text(
-                        label,
-                        key: ValueKey(label),
-                        style: const TextStyle(color: AppColors.saffron, fontSize: 12, fontWeight: FontWeight.w600),
+                    if (!useImages) ...[
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 500),
+                        child: Text(
+                          label,
+                          key: ValueKey(label),
+                          style: const TextStyle(color: AppColors.saffron, fontSize: 12, fontWeight: FontWeight.w600),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 6),
+                      const SizedBox(height: 6),
+                    ],
                     Text('شاخەکانی هەولێر',
                         style: Theme.of(context)
                             .textTheme
@@ -264,8 +299,8 @@ class _HeroState extends State<_Hero> {
                 // Dot indicator so the rotation reads as an intentional
                 // carousel, not a flicker.
                 Row(
-                  children: List.generate(_heroSlides.length, (i) {
-                    final active = i == _slideIndex;
+                  children: List.generate(_slideCount, (i) {
+                    final active = i == index;
                     return AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
                       margin: const EdgeInsets.only(left: 5),
@@ -282,6 +317,115 @@ class _HeroState extends State<_Hero> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Advertisements managed from the admin dashboard. Renders nothing when
+/// there is no active ad (or the backend is unreachable).
+class _AdBanner extends ConsumerWidget {
+  const _AdBanner();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ads = ref.watch(adsProvider).value ?? const <AdItem>[];
+    if (ads.isEmpty) return const SizedBox.shrink();
+    final screenWidth = MediaQuery.of(context).size.width;
+    final cardWidth = ads.length == 1 ? screenWidth - AppSpacing.lg * 2 : 280.0;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
+      child: SizedBox(
+        height: 110,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          itemCount: ads.length,
+          separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.sm),
+          itemBuilder: (context, i) => _AdCard(ad: ads[i], width: cardWidth),
+        ),
+      ),
+    );
+  }
+}
+
+class _AdCard extends StatelessWidget {
+  const _AdCard({required this.ad, required this.width});
+  final AdItem ad;
+  final double width;
+
+  Future<void> _open() async {
+    final uri = Uri.tryParse(ad.link);
+    if (uri == null || (uri.scheme != 'http' && uri.scheme != 'https')) return;
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(AppSpacing.cardRadius);
+    return SizedBox(
+      width: width,
+      child: InkWell(
+        onTap: ad.link.isEmpty ? null : _open,
+        borderRadius: radius,
+        child: ClipRRect(
+          borderRadius: radius,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              if (ad.image.isNotEmpty)
+                CachedNetworkImage(
+                  imageUrl: ad.image,
+                  fit: BoxFit.cover,
+                  placeholder: (_, __) => const ColoredBox(color: AppColors.clay),
+                  errorWidget: (_, __, ___) => const ColoredBox(color: AppColors.clay),
+                )
+              else
+                const ColoredBox(color: AppColors.clay),
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Colors.transparent, AppColors.ink.withValues(alpha: 0.8)],
+                  ),
+                ),
+              ),
+              PositionedDirectional(
+                top: 8,
+                end: 8,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                  decoration: BoxDecoration(color: AppColors.saffron, borderRadius: BorderRadius.circular(6)),
+                  child: const Text('بانگەشە', style: TextStyle(fontSize: 10, color: AppColors.ink, fontWeight: FontWeight.w600)),
+                ),
+              ),
+              PositionedDirectional(
+                start: 10,
+                end: 10,
+                bottom: 8,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      ad.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(color: AppColors.limestoneWhite, fontSize: 14, fontWeight: FontWeight.w700),
+                    ),
+                    if (ad.company.isNotEmpty)
+                      Text(
+                        ad.company,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(color: AppColors.limestoneWhite, fontSize: 11),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

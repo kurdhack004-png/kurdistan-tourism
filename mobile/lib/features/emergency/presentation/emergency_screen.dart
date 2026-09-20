@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../content/providers/content_provider.dart';
 
-const _contacts = [
-  ('پ��لیس', '104'),
-  ('یارمەتی پزیشکی', '122'),
-  ('بەرگری کیویڵ', '115'),
-];
-
-class EmergencyScreen extends StatelessWidget {
+class EmergencyScreen extends ConsumerWidget {
   const EmergencyScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Numbers are managed from the admin dashboard; the built-in list is
+    // shown while loading and whenever the backend is unreachable.
+    final contacts = ref.watch(emergencyProvider).value ?? kDefaultEmergencyContacts;
+
     return Scaffold(
       appBar: AppBar(title: const Text('یارمەتی کتوپڕ')),
       body: ListView(
@@ -32,10 +32,17 @@ class EmergencyScreen extends StatelessWidget {
             ]),
           ),
           const SizedBox(height: AppSpacing.lg),
-          for (final c in _contacts)
+          for (final c in contacts)
             Card(
               margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-              child: ListTile(title: Text(c.$1), subtitle: Text(c.$2), trailing: IconButton(icon: const Icon(Icons.call_outlined, color: AppColors.danger), onPressed: () => launchUrl(Uri.parse('tel:${c.$2}')))),
+              child: ListTile(
+                title: Text(c.label),
+                subtitle: Text(c.phone),
+                trailing: IconButton(
+                  icon: const Icon(Icons.call_outlined, color: AppColors.danger),
+                  onPressed: () => launchUrl(Uri(scheme: 'tel', path: c.phone.replaceAll(' ', ''))),
+                ),
+              ),
             ),
           const SizedBox(height: AppSpacing.md),
           FilledButton.icon(onPressed: () => _shareLocation(context), icon: const Icon(Icons.my_location_rounded, size: 18), label: const Text('شوێنی خۆم بنێرە')),

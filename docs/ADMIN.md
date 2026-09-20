@@ -5,7 +5,8 @@
   so demoting or banning a user takes effect immediately.
 * Failed logins are rate limited (10 failures / 15 min / IP).
 * Uploaded images are validated by content (JPG, PNG, GIF, WEBP only, max 8 MB) and stored in `backend-node/uploads` (`UPLOAD_DIR`).
-  Set `PUBLIC_URL` in `.env` when the API is deployed so image links use the public address.
+  They are saved as `/uploads/<file>` and expanded to absolute URLs in the public API responses using the address the caller used
+  (or `PUBLIC_URL` when set), so a phone on the LAN gets `http://<pc-ip>:8000/uploads/...` even if the admin uploaded via `localhost`.
 
 ## Public endpoints for the mobile app (no login)
 | Endpoint | Returns |
