@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -14,14 +15,14 @@ class TripPlannerScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final tripIds = ref.watch(tripProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('پلانی گەشتم')),
+      appBar: AppBar(title: Text('trip_plan'.tr())),
       body: FutureBuilder<List<TouristLocation>>(
         future: ref.read(locationCacheProvider).load(),
         builder: (context, snapshot) {
           final all = snapshot.data == null || snapshot.data!.isEmpty ? demoLocations : snapshot.data!;
           final trip = all.where((l) => tripIds.contains(l.id)).toList();
           if (trip.isEmpty) {
-            return const Center(child: Padding(padding: EdgeInsets.all(AppSpacing.xl), child: Text('هێشتا هیچ شوێنێکت زیاد نەکردووە. لە وردەکاری شوێنێکەوە "زیادکردن بۆ پلانی گەشتم" دابگرە.', textAlign: TextAlign.center, style: TextStyle(color: AppColors.riverstone))));
+            return Center(child: Padding(padding: const EdgeInsets.all(AppSpacing.xl), child: Text('trip_empty'.tr(), textAlign: TextAlign.center, style: const TextStyle(color: AppColors.riverstone))));
           }
           return ListView.builder(
             padding: const EdgeInsets.all(AppSpacing.lg),
