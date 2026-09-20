@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -16,7 +17,7 @@ class EmergencyScreen extends ConsumerWidget {
     final contacts = ref.watch(emergencyProvider).value ?? kDefaultEmergencyContacts;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('یارمەتی کتوپڕ')),
+      appBar: AppBar(title: const Text('emergency'.tr())),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
@@ -26,9 +27,9 @@ class EmergencyScreen extends ConsumerWidget {
             child: Column(children: [
               const Icon(Icons.emergency_outlined, color: AppColors.danger, size: 48),
               const SizedBox(height: AppSpacing.sm),
-              Text('یارمەتی کتوپڕ', style: Theme.of(context).textTheme.titleMedium),
+              Text('emergency'.tr(), style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 4),
-              Text('پەیوەندی بە خزمەتگوزاری فەرمی بکە و شوێنی خۆت هاوبەش بکە کاتێک پێویستە.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium),
+              Text('share_location'.tr(), textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium),
             ]),
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -45,7 +46,7 @@ class EmergencyScreen extends ConsumerWidget {
               ),
             ),
           const SizedBox(height: AppSpacing.md),
-          FilledButton.icon(onPressed: () => _shareLocation(context), icon: const Icon(Icons.my_location_rounded, size: 18), label: const Text('شوێنی خۆم بنێرە')),
+          FilledButton.icon(onPressed: () => _shareLocation(context), icon: const Icon(Icons.my_location_rounded, size: 18), label: const Text('share_location'.tr())),
         ],
       ),
     );
@@ -55,7 +56,7 @@ class EmergencyScreen extends ConsumerWidget {
     var permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) permission = await Geolocator.requestPermission();
     if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
-      if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('ڕێگەپێدانی شوێن پێویستە بۆ ئەم تایبەتمەندییە')));
+      if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('location_permission'.tr())));
       return;
     }
     final pos = await Geolocator.getCurrentPosition();
