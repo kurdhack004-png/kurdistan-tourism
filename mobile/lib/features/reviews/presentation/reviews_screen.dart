@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -22,7 +23,7 @@ class ReviewsScreen extends ConsumerWidget {
         backgroundColor: AppColors.saffron,
         foregroundColor: AppColors.inkDeep,
         icon: const Icon(Icons.rate_review_outlined),
-        label: const Text('نووسینی ڕیڤیو'),
+        label: Text('review_write'.tr()),
         onPressed: () => _openWriteReviewSheet(context, ref, key),
       ),
       body: reviews.when(
@@ -81,7 +82,7 @@ class ReviewsScreen extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('ڕیڤیوی خۆت بنووسە', style: Theme.of(sheetContext).textTheme.titleMedium),
+              Text('review_yours'.tr(), style: Theme.of(sheetContext).textTheme.titleMedium),
               const SizedBox(height: AppSpacing.md),
               Row(
                 children: List.generate(5, (i) => IconButton(
@@ -94,7 +95,7 @@ class ReviewsScreen extends ConsumerWidget {
               TextField(
                 controller: commentCtrl,
                 maxLines: 3,
-                decoration: const InputDecoration(hintText: 'ڕوونکردنەوەیەک بنووسە (ئارەزوومەندانە)'),
+                decoration: InputDecoration(hintText: 'review_comment_hint'.tr()),
               ),
               const SizedBox(height: AppSpacing.md),
               SizedBox(
@@ -105,7 +106,7 @@ class ReviewsScreen extends ConsumerWidget {
                           rating: rating, comment: commentCtrl.text.trim().isEmpty ? null : commentCtrl.text.trim());
                     if (sheetContext.mounted) Navigator.of(sheetContext).pop();
                   },
-                  child: const Text('ناردن'),
+                  child: Text('send'.tr()),
                 ),
               ),
             ],
