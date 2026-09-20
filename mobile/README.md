@@ -56,3 +56,22 @@ The app intentionally remains usable when the API is unavailable:
 - Favorites, settings and trip selections are persisted locally.
 
 This fallback is for development/demo use. For production, connect the app to the real backend and payment provider.
+
+
+## Production map configuration
+
+The app reads these optional compile-time values:
+
+- `MAP_STYLE_URL`: production MapLibre style URL.
+- `MAP_API_KEY`: map provider key, used when the style URL contains `{MAP_API_KEY}`.
+
+Example:
+
+```text
+flutter build apk --release \
+  --dart-define=API_BASE_URL=https://YOUR-API-DOMAIN/api \
+  --dart-define=MAP_STYLE_URL=https://YOUR-MAP-PROVIDER/style.json?key={MAP_API_KEY} \
+  --dart-define=MAP_API_KEY=YOUR_MAP_KEY
+```
+
+Do not hardcode a provider secret in Dart source. Configure the production values in GitHub Actions secrets for release builds.
