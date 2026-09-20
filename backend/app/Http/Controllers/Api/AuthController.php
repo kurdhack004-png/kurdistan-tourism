@@ -25,7 +25,7 @@ class AuthController extends Controller
         $user = User::create([
             ...$data,
             'password' => Hash::make($data['password']), // bcrypt/argon2id, never plaintext
-            'role' => 'tourist',
+            'role' => 'user',
         ]);
 
         $token = $user->createToken('mobile', ['*'], now()->addDays(30))->plainTextToken;
