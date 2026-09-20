@@ -128,7 +128,7 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen>
               child: Column(
                 children: [
                   DropdownButtonFormField<String>(
-                    value: category,
+                    initialValue: category,
                     items: categories.map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(),
                     onChanged: (v) => setLocal(() => category = v ?? category),
                     decoration: InputDecoration(labelText: 'admin_category'.tr()),
@@ -154,7 +154,10 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen>
                   'category': category,
                   'name_ckb': nameCkb.text.trim(), 'name_ar': nameAr.text.trim(), 'name_en': nameEn.text.trim(),
                   'description_ckb': descCkb.text.trim(), 'description_ar': descAr.text.trim(), 'description_en': descEn.text.trim(),
-                  if (double.tryParse(lat.text) != null && double.tryParse(lng.text) != null) 'latitude': double.parse(lat.text), 'longitude': double.parse(lng.text),
+                  if (double.tryParse(lat.text) != null && double.tryParse(lng.text) != null) ...{
+                    'latitude': double.parse(lat.text),
+                    'longitude': double.parse(lng.text),
+                  },
                 };
                 try {
                   final api = ref.read(apiClientProvider).client;
@@ -163,7 +166,8 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen>
                   } else {
                     await api.patch('/admin/locations/${item['id']}', data: payload);
                   }
-                  if (context.mounted) Navigator.pop(context);
+                  if (!mounted) return;
+                  Navigator.pop(context);
                   _message('admin_saved'.tr());
                   await _refresh();
                 } catch (_) {
@@ -206,7 +210,7 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen>
             child: SingleChildScrollView(
               child: Column(children: [
                 DropdownButtonFormField<String>(
-                  value: type, items: types.map((v) => DropdownMenuItem(value: v, child: Text(v.tr()))).toList(),
+                  initialValue: type, items: types.map((v) => DropdownMenuItem(value: v, child: Text(v.tr()))).toList(),
                   onChanged: (v) => setLocal(() => type = v ?? type),
                   decoration: InputDecoration(labelText: 'admin_type'.tr()),
                 ),
@@ -233,13 +237,17 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen>
                   'description_ckb': c['description_ckb']!.text.trim(), 'description_ar': c['description_ar']!.text.trim(), 'description_en': c['description_en']!.text.trim(),
                   'city_ckb': c['city_ckb']!.text.trim(), 'city_ar': c['city_ar']!.text.trim(), 'city_en': c['city_en']!.text.trim(),
                   'price_per_night': double.tryParse(c['price']!.text) ?? 0,
-                  if (double.tryParse(c['lat']!.text) != null && double.tryParse(c['lng']!.text) != null) 'latitude': double.parse(c['lat']!.text), 'longitude': double.parse(c['lng']!.text),
+                  if (double.tryParse(c['lat']!.text) != null && double.tryParse(c['lng']!.text) != null) ...{
+                    'latitude': double.parse(c['lat']!.text),
+                    'longitude': double.parse(c['lng']!.text),
+                  },
                 };
                 try {
                   final api = ref.read(apiClientProvider).client;
                   if (item == null) await api.post('/admin/accommodations', data: payload);
                   else await api.patch('/admin/accommodations/${item['id']}', data: payload);
-                  if (context.mounted) Navigator.pop(context);
+                  if (!mounted) return;
+                  Navigator.pop(context);
                   _message('admin_saved'.tr());
                   await _refresh();
                 } catch (_) { _message('admin_save_failed'.tr(), error: true); }
@@ -302,7 +310,8 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen>
                 final api = ref.read(apiClientProvider).client;
                 if (item == null) await api.post('/admin/ads', data: payload);
                 else await api.patch('/admin/ads/${item['id']}', data: payload);
-                if (context.mounted) Navigator.pop(context);
+                if (!mounted) return;
+                Navigator.pop(context);
                 _message('admin_saved'.tr());
                 await _refresh();
               } catch (_) { _message('admin_save_failed'.tr(), error: true); }
@@ -374,7 +383,9 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen>
         children: [
           Align(alignment: AlignmentDirectional.centerEnd, child: FilledButton.icon(onPressed: add, icon: const Icon(Icons.add), label: Text('admin_add'.tr()))),
           const SizedBox(height: 12),
-          if (items.isEmpty) Center(child: Padding(padding: const EdgeInsets.all(32), child: Text('admin_empty'.tr()))),
+          if (items.isEmpty) {
+            Center(child: Padding(padding: const EdgeInsets.all(32), child: Text('admin_empty'.tr())))
+          },
           ...items.map(card),
         ],
       ),
