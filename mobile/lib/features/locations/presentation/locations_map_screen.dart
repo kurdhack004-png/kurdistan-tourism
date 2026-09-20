@@ -210,7 +210,7 @@ class _LocationsMapScreenState extends ConsumerState<LocationsMapScreen> {
         await controller.addSymbol(
           SymbolOptions(
             geometry: LatLng(location.latitude, location.longitude),
-            textField: location.nameCkb,
+            textField: location.localizedName(context.locale.languageCode),
             textSize: 11,
             textOffset: const Offset(0, 1.6),
             textColor: '#12452F',
@@ -259,7 +259,7 @@ class _MapFallback extends StatelessWidget {
               leading: const CircleAvatar(
                 child: Icon(Icons.place_outlined),
               ),
-              title: Text(l.nameCkb),
+              title: Text(l.localizedName(context.locale.languageCode)),
               subtitle: Text(
                 '${l.latitude.toStringAsFixed(4)}, '
                 '${l.longitude.toStringAsFixed(4)}',
