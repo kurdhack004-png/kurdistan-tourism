@@ -107,5 +107,12 @@
   "hotels": "الفنادق والإقامة",
   "booking_fee": "رسوم الحجز",
   "service_fee": "رسوم الخدمة",
-  "pending_payment": "لم يتم تأكيد الدفع بعد."
+  "pending_payment": "لم يتم تأكيد الدفع بعد.",
+  "accommodation_load_failed": "تعذر تحميل أماكن الإقامة",
+  "hotel": "فندق",
+  "house": "منزل",
+  "cabin": "كوخ",
+  "chalet": "شاليه",
+  "guesthouse": "بيت ضيافة",
+  "per_night_label": "/ ليلة"
 }
