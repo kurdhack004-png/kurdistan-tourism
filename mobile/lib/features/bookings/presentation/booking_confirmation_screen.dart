@@ -30,7 +30,10 @@ class BookingConfirmationScreen extends StatelessWidget {
                     textAlign: TextAlign.center),
                 const SizedBox(height: AppSpacing.sm),
                 Text(
-                  '${booking.accommodationName} • ${booking.guests} میوان',
+                  'booking_guests_summary'.tr(namedArgs: {
+                    'name': booking.accommodationName,
+                    'guests': booking.guests.toString(),
+                  }),
                   style: Theme.of(context).textTheme.bodyMedium,
                   textAlign: TextAlign.center,
                 ),
