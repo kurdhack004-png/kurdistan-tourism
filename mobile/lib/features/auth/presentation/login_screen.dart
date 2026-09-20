@@ -63,7 +63,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       Text(
                         'login'.tr(),
                         textAlign: TextAlign.center,
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: AppColors.limestoneWhite,
                           fontSize: 22,
                           fontWeight: FontWeight.w700,
