@@ -70,7 +70,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               children: [
                 const Icon(Icons.person_add_alt_1_rounded, size: 48, color: AppColors.saffron),
                 const SizedBox(height: AppSpacing.md),
-                const Text(
+                Text(
                   'create_account'.tr(),
                   textAlign: TextAlign.center,
                   style: TextStyle(
