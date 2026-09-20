@@ -5,12 +5,13 @@ use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\FavoriteController;
+use App\Http\Controllers\Api\HealthController;
 use App\Http\Controllers\Api\LocationController;
 use App\Http\Controllers\Api\PaymentWebhookController;
 use App\Http\Controllers\Api\ReviewController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/health', fn () => response()->json(['success' => true, 'status' => 'online', 'version' => '10.1']));
+Route::get('/health', HealthController::class);
 
 // Provider callbacks are authenticated by the webhook signature, not Sanctum.
 Route::post('/payments/webhook', [PaymentWebhookController::class, 'handle'])
