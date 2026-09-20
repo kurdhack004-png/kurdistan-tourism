@@ -102,5 +102,7 @@
   "places_on_map": "{count} tourist places in this area",
   "map_open_failed": "Could not open directions.",
   "data_load_failed": "Could not load place data.",
-  "offline_pending_payment": "The booking was saved as pending; payment is not confirmed yet."
+  "offline_pending_payment": "The booking was saved as pending; payment is not confirmed yet.",
+  "explore": "Explore",
+  "hotels": "Hotels & stays"
 }
