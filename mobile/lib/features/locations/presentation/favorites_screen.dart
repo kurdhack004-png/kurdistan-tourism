@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../data/local/favorites_provider.dart';
 import '../providers/locations_provider.dart';
@@ -13,7 +14,7 @@ class FavoritesScreen extends ConsumerWidget {
     final ids = ref.watch(favoritesProvider);
     final locations = ref.watch(nearbyLocationsProvider(const NearbyParams(36.1911, 44.0092)));
     return Scaffold(
-      appBar: AppBar(title: const Text('دڵخوازەکان')),
+      appBar: AppBar(title: Text('favorites'.tr())),
       body: locations.when(
         data: (items) {
           final saved = items.where((l) => ids.contains(l.id)).toList();
@@ -43,7 +44,7 @@ class FavoritesScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) => const Center(child: Text('نەتوانرا دڵخوازەکان باربکرێن.')),
+        error: (_, __) => Center(child: Text('favorites_load_failed'.tr())),
       ),
     );
   }
