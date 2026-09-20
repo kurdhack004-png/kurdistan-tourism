@@ -26,8 +26,10 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
   DateTime _checkOut = DateTime.now().add(const Duration(days: 2));
   int _guests = 2;
 
+  static const double _bookingFee = 10000;
   int get _nights => _checkOut.difference(_checkIn).inDays.clamp(1, 365);
-  double get _total => _nights * widget.pricePerNight;
+  double get _roomTotal => _nights * widget.pricePerNight;
+  double get _total => _roomTotal + _bookingFee;
 
   Future<void> _pickDate({required bool isCheckIn}) async {
     final picked = await showDatePicker(
@@ -113,16 +115,33 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
               color: AppColors.saffron.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Column(
               children: [
-                Text(
-                  '$_nights ${'nights'.tr()}',
-                  style: Theme.of(context).textTheme.bodyMedium,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('$_nights ${'nights'.tr()}'),
+                    Text('${_roomTotal.toStringAsFixed(0)} ${'iqd'.tr()}'),
+                  ],
                 ),
-                Text(
-                  '${_total.toStringAsFixed(0)} ${'iqd'.tr()}',
-                  style: Theme.of(context).textTheme.titleMedium,
+                const SizedBox(height: 6),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('booking_fee'.tr()),
+                    Text('${_bookingFee.toStringAsFixed(0)} ${'iqd'.tr()}'),
+                  ],
+                ),
+                const Divider(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('total'.tr(), style: Theme.of(context).textTheme.titleMedium),
+                    Text(
+                      '${_total.toStringAsFixed(0)} ${'iqd'.tr()}',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ],
                 ),
               ],
             ),
