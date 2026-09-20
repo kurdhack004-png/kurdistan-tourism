@@ -63,7 +63,7 @@ class AdminController extends Controller
     public function updateBooking(Request $request,string $id){ $b=Booking::findOrFail($id); $d=$request->validate(['status'=>['required','in:pending,confirmed,cancelled,completed']]); $b->update($d); return response()->json(['success'=>true,'data'=>$b->fresh()]); }
 
     public function users(){ return response()->json(['success'=>true,'data'=>User::query()->latest()->paginate(50)]); }
-    public function updateUser(Request $request,string $id){ $u=User::findOrFail($id); $d=$request->validate(['role'=>['sometimes','in:user,guide,admin,owner'],'is_active'=>['sometimes','boolean'],'preferred_lang'=>['sometimes','in:ckb,ar,en']]); $u->update($d); return response()->json(['success'=>true,'data'=>$u->fresh()]); }
+    public function updateUser(Request $request,string $id){ $u=User::findOrFail($id); $d=$request->validate(['role'=>['sometimes','in:tourist,guide,admin,accommodation_owner'],'is_active'=>['sometimes','boolean'],'preferred_lang'=>['sometimes','in:ckb,ar,en']]); $u->update($d); return response()->json(['success'=>true,'data'=>$u->fresh()]); }
 
     public function reviews(){ return response()->json(['success'=>true,'data'=>Review::with('user:id,full_name,email')->latest()->paginate(50)]); }
     public function deleteReview(string $id){ Review::findOrFail($id)->delete(); return response()->json(['success'=>true]); }
