@@ -40,7 +40,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::middleware('role:admin')->prefix('admin')->group(function () {
         Route::get('/locations', [AdminController::class, 'locations']);
+        Route::post('/locations', [AdminController::class, 'storeLocation']);
+        Route::patch('/locations/{id}', [AdminController::class, 'updateLocation']);
         Route::delete('/locations/{id}', [AdminController::class, 'deleteLocation']);
+        Route::post('/media', [AdminController::class, 'uploadMedia']);
+        Route::delete('/media/{id}', [AdminController::class, 'deleteMedia']);
 
         Route::get('/accommodations', [AdminController::class, 'accommodations']);
         Route::post('/accommodations', [AdminController::class, 'storeAccommodation']);
@@ -59,6 +63,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/ads', [AdminController::class, 'ads']);
         Route::post('/ads', [AdminController::class, 'storeAd']);
         Route::patch('/ads/{id}', [AdminController::class, 'updateAd']);
+        Route::post('/ads/{id}/image', [AdminController::class, 'uploadAdImage']);
         Route::delete('/ads/{id}', [AdminController::class, 'deleteAd']);
     });
 
