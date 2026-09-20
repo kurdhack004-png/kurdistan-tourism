@@ -38,23 +38,28 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
+      - name: Check localization keys
+        run: dart run tool/check_localization.dart
+
       - name: Analyze
         run: flutter analyze
 
       - name: Build APK
         env:
           API_BASE_URL: ${{ secrets.API_BASE_URL }}
+          MAP_STYLE_URL: ${{ secrets.MAP_STYLE_URL }}
+          MAP_API_KEY: ${{ secrets.MAP_API_KEY }}
         run: |
           if [ -z "$API_BASE_URL" ]; then
             echo "API_BASE_URL GitHub secret is required."
             exit 1
           fi
-          flutter build apk --release --dart-define=API_BASE_URL="$API_BASE_URL"
+          flutter build apk --release --dart-define=API_BASE_URL="$API_BASE_URL" --dart-define=MAP_STYLE_URL="$MAP_STYLE_URL" --dart-define=MAP_API_KEY="$MAP_API_KEY"
 
       - name: Build AAB
         env:
           API_BASE_URL: ${{ secrets.API_BASE_URL }}
-        run: flutter build appbundle --release --dart-define=API_BASE_URL="$API_BASE_URL"
+        run: flutter build appbundle --release --dart-define=API_BASE_URL="$API_BASE_URL" --dart-define=MAP_STYLE_URL="$MAP_STYLE_URL" --dart-define=MAP_API_KEY="$MAP_API_KEY"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
