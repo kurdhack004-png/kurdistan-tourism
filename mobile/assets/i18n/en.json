@@ -38,5 +38,10 @@
   "total": "Total",
   "remove_guest": "Decrease guests",
   "add_guest": "Increase guests",
-  "login_to_continue": "Please log in to continue."
+  "login_to_continue": "Please log in to continue.",
+  "fib": "FIB",
+  "card": "Visa / Master card",
+  "cash": "Cash on site",
+  "bank_transfer": "Bank transfer",
+  "payment_note": "Card details are never stored in the app. Real payment processing must be handled by an authorized provider."
 }
