@@ -58,7 +58,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       appBar: AppBar(
         backgroundColor: AppColors.ink,
         foregroundColor: AppColors.limestoneWhite,
-        title: const Text('register'.tr()),
+        title: Text('register'.tr()),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -138,7 +138,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             color: AppColors.inkDeep,
                           ),
                         )
-                      : const Text('تۆمارکردن'),
+                      : Text('register'.tr()),
                 ),
               ],
             ),
