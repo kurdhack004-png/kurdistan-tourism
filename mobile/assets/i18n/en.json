@@ -43,5 +43,9 @@
   "card": "Visa / Master card",
   "cash": "Cash on site",
   "bank_transfer": "Bank transfer",
-  "payment_note": "Card details are never stored in the app. Real payment processing must be handled by an authorized provider."
+  "payment_note": "Card details are never stored in the app. Real payment processing must be handled by an authorized provider.",
+  "auth_login_failed": "Login failed. If the backend is not running, register a new account first.",
+  "register_account": "Create account",
+  "no_account_register": "Don't have an account? Create one",
+  "app_slogan": "Explore Kurdistan"
 }
