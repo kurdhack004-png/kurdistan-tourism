@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../auth/presentation/login_screen.dart';
@@ -26,7 +27,6 @@ class NearbyStaysScreen extends ConsumerWidget {
       );
       if (!context.mounted || !ref.read(authProvider).isAuthenticated) return;
     }
-
     if (!context.mounted) return;
     await Navigator.of(context).push(
       MaterialPageRoute(
@@ -48,14 +48,14 @@ class NearbyStaysScreen extends ConsumerWidget {
     );
 
     return Scaffold(
-      appBar: AppBar(title: const Text('شوێنی مانەوەی نزیک')),
+      appBar: AppBar(title: Text('nearby_stays'.tr())),
       body: stays.when(
         data: (items) {
           if (items.isEmpty) {
-            return const Center(
+            return Center(
               child: Text(
-                'هیچ شوێنێکی مانەوە لە نزیک ئێرە تۆمار نەکراوە.',
-                style: TextStyle(color: AppColors.riverstone),
+                'no_stays'.tr(),
+                style: const TextStyle(color: AppColors.riverstone),
               ),
             );
           }
@@ -83,7 +83,7 @@ class NearbyStaysScreen extends ConsumerWidget {
                       name: a.nameCkb,
                       price: a.pricePerNight,
                     ),
-                    child: const Text('حجزکردن'),
+                    child: Text('book'.tr()),
                   ),
                 ),
               );
