@@ -32,5 +32,11 @@
   "add_to_trip": "Add to trip",
   "on_trip": "In trip plan",
   "view_on_map": "View on map",
-  "login_to_book": "Please log in to continue booking."
+  "login_to_book": "Please log in to continue booking.",
+  "iqd": "IQD",
+  "per_night": "/ night",
+  "total": "Total",
+  "remove_guest": "Decrease guests",
+  "add_guest": "Increase guests",
+  "login_to_continue": "Please log in to continue."
 }
