@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/category_visual.dart';
@@ -27,10 +28,6 @@ class _CategoryPlaceholder extends StatelessWidget {
   }
 }
 
-/// Image-led row card. Deliberately not the "SaaS card kit" (uniform
-/// rounded-rect + soft grey shadow on everything) — no shadow at all, no
-/// border; separation between cards comes purely from spacing, and the
-/// only color is the image itself plus the saffron rating stamp.
 class LocationCard extends StatelessWidget {
   const LocationCard({
     super.key,
@@ -47,6 +44,7 @@ class LocationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final languageCode = context.locale.languageCode;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
@@ -75,9 +73,12 @@ class LocationCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(location.nameCkb,
-                      style: Theme.of(context).textTheme.titleMedium,
-                      maxLines: 1, overflow: TextOverflow.ellipsis),
+                  Text(
+                    location.localizedName(languageCode),
+                    style: Theme.of(context).textTheme.titleMedium,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                   const SizedBox(height: 3),
                   Text(
                     location.elevationMeters != null
