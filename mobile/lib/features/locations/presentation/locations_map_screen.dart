@@ -23,6 +23,7 @@ class _LocationsMapScreenState extends ConsumerState<LocationsMapScreen> {
   List<TouristLocation> _locations = const [];
   bool _mapFailed = false;
   bool _locating = false;
+  Position? _currentPosition;
 
   @override
   void initState() {
@@ -58,6 +59,7 @@ class _LocationsMapScreenState extends ConsumerState<LocationsMapScreen> {
     setState(() {
       _locating = false;
       if (pos != null) {
+        _currentPosition = pos;
         _center = LatLng(pos.latitude, pos.longitude);
       }
     });
@@ -163,7 +165,9 @@ class _LocationsMapScreenState extends ConsumerState<LocationsMapScreen> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'places_on_map'.tr(namedArgs: {'count': items.length.toString()}),
+                              _currentPosition != null && items.isNotEmpty
+                                  ? '${'places_on_map'.tr(namedArgs: {'count': items.length.toString()})} • ${_distanceKm(items.first).toStringAsFixed(1)} km'
+                                  : 'places_on_map'.tr(namedArgs: {'count': items.length.toString()}),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -227,6 +231,18 @@ class _LocationsMapScreenState extends ConsumerState<LocationsMapScreen> {
     } catch (_) {
       if (mounted) setState(() => _mapFailed = true);
     }
+  }
+
+  double _distanceKm(TouristLocation location) {
+    final p = _currentPosition;
+    if (p == null) return 0;
+    return Geolocator.distanceBetween(
+          p.latitude,
+          p.longitude,
+          location.latitude,
+          location.longitude,
+        ) /
+        1000;
   }
 
   void _openLocation(TouristLocation location) {
