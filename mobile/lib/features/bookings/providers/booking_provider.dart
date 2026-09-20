@@ -64,9 +64,8 @@ class BookingNotifier extends StateNotifier<AsyncValue<List<Booking>>> {
       final api = _ref.read(apiClientProvider);
       final bookingRes = await api.client.post('/bookings', data: {
         'accommodation_id': accommodationId,
-        'date': checkIn.toIso8601String().split('T').first,
-        'nights': checkOut.difference(checkIn).inDays.clamp(1, 365),
-        'total': total,
+        'check_in': checkIn.toIso8601String().split('T').first,
+        'check_out': checkOut.toIso8601String().split('T').first,
         'guests': guests,
       });
       final booking = Booking.fromJson(bookingRes.data['data'] as Map<String, dynamic>);
