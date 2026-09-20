@@ -11,19 +11,13 @@ import 'features/splash/presentation/splash_screen.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // In release builds Flutter silently swaps any widget that throws
-  // during build for a blank grey box, which is impossible to debug from
-  // a screenshot. Show the actual error text instead, in every build
-  // mode, so a crash is diagnosable instead of just "a grey rectangle".
+  // Keep the error surface language-neutral. Localized text is rendered
+  // after EasyLocalization is available; this global fallback must not leak
+  // Kurdish text into English or Arabic mode.
   ErrorWidget.builder = (FlutterErrorDetails details) => Container(
         color: const Color(0xFFFFF3F1),
-        padding: const EdgeInsets.all(12),
         alignment: Alignment.center,
-        child: Text(
-          'هەڵەیەک ڕوویدا:\n${details.exceptionAsString()}',
-          textAlign: TextAlign.center,
-          style: const TextStyle(color: Color(0xFFA33B2E), fontSize: 11),
-        ),
+        child: const Icon(Icons.error_outline, color: Color(0xFFA33B2E), size: 36),
       );
 
   await EasyLocalization.ensureInitialized();
@@ -41,7 +35,9 @@ Future<void> main() async {
         ],
         path: 'assets/i18n',
         fallbackLocale: const Locale('ckb'),
-        startLocale: initialLocale,
+        startLocale: ['ckb', 'ar', 'en'].contains(initialLocale.languageCode)
+            ? initialLocale
+            : const Locale('ckb'),
         child: const KurdistanTourismApp(),
       ),
     ),
@@ -56,7 +52,7 @@ class KurdistanTourismApp extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
 
     return MaterialApp(
-      title: 'گەشتیاری کوردستان',
+      title: 'app_name'.tr(),
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
