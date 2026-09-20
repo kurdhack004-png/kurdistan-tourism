@@ -166,7 +166,7 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen>
                   } else {
                     await api.patch('/admin/locations/${item['id']}', data: payload);
                   }
-                  if (!mounted) return;
+                  if (!context.mounted) return;
                   Navigator.of(context).pop();
                   _message('admin_saved'.tr());
                   await _refresh();
@@ -249,7 +249,7 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen>
                   } else {
                     await api.patch('/admin/accommodations/${item['id']}', data: payload);
                   }
-                  if (!mounted) return;
+                  if (!context.mounted) return;
                   Navigator.of(context).pop();
                   _message('admin_saved'.tr());
                   await _refresh();
@@ -316,7 +316,7 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen>
                 } else {
                   await api.patch('/admin/ads/${item['id']}', data: payload);
                 }
-                if (!mounted) return;
+                if (!context.mounted) return;
                 Navigator.pop(context);
                 _message('admin_saved'.tr());
                 await _refresh();
