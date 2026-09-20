@@ -8,12 +8,14 @@ class AuthState {
     this.isLoading = false,
     this.error,
     this.isLocalMode = false,
+    this.role,
   });
 
   final bool isAuthenticated;
   final bool isLoading;
   final String? error;
   final bool isLocalMode;
+  final String? role;
 
   AuthState copyWith({
     bool? isAuthenticated,
@@ -21,12 +23,14 @@ class AuthState {
     String? error,
     bool clearError = false,
     bool? isLocalMode,
+    String? role,
   }) =>
       AuthState(
         isAuthenticated: isAuthenticated ?? this.isAuthenticated,
         isLoading: isLoading ?? this.isLoading,
         error: clearError ? null : (error ?? this.error),
         isLocalMode: isLocalMode ?? this.isLocalMode,
+        role: role ?? this.role,
       );
 }
 
@@ -38,13 +42,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final ApiClient _api;
   late final Future<void> ready;
 
-  Future<void> _restoreSession() async {
+  Future<void> _loadRole() async {\n    try {\n      final res = await _api.client.get('/auth/me');\n      final body = Map<String, dynamic>.from(res.data as Map);\n      final user = body['user'] is Map ? Map<String, dynamic>.from(body['user'] as Map) : null;\n      state = state.copyWith(role: user?['role'] as String?);\n    } catch (_) {}\n  }\n\n  Future<void> _restoreSession() async {
     final token = await _api.readToken();
     if (token != null) {
-      state = state.copyWith(
-        isAuthenticated: true,
-        isLocalMode: token.startsWith('local_demo_'),
-      );
+      state = state.copyWith(isAuthenticated: true, isLocalMode: token.startsWith('local_demo_'));\n      if (!token.startsWith('local_demo_')) await _loadRole();
     }
   }
 
@@ -68,7 +69,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         isAuthenticated: true,
         isLoading: false,
         isLocalMode: false,
-      );
+      );\n      await _loadRole();
     } catch (_) {
       final ok = await DemoAuth.login(email, password);
       if (ok) {
@@ -99,10 +100,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final res = await _api.client.post(
         '/auth/register',
         data: {
-          'name': fullName,
+          'full_name': fullName,
           'email': email,
-          'password': password,
-        },
+          'password': password,\n          'password_confirmation': password,\n        },
       );
       final body = Map<String, dynamic>.from(res.data as Map);
       final data = body['data'] is Map
