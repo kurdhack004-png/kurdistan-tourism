@@ -114,5 +114,17 @@
   "cabin": "كوخ",
   "chalet": "شاليه",
   "guesthouse": "بيت ضيافة",
-  "per_night_label": "/ ليلة"
+  "per_night_label": "/ ليلة",
+  "favorites_empty": "لا توجد أماكن مفضلة بعد.",
+  "favorites_load_failed": "تعذر تحميل المفضلة.",
+  "review_title": "مراجعة {title}",
+  "reviews_load_failed": "تعذر تحميل المراجعات.",
+  "booking_guests_summary": "{name} • {guests} ضيف",
+  "bookings_empty": "لا توجد حجوزات بعد.",
+  "bookings_load_failed": "تعذر تحميل الحجوزات.",
+  "booking_dates_guests": "{checkIn} ← {checkOut} • {guests} ضيف",
+  "status_pending": "قيد الانتظار",
+  "status_confirmed": "مؤكد",
+  "status_cancelled": "ملغى",
+  "status_completed": "مكتمل"
 }
