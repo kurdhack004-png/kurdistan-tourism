@@ -182,8 +182,12 @@ class _HeroState extends ConsumerState<_Hero> {
     // Images come from the admin dashboard. With no images (or offline) the
     // 5 built-in category scenes are shown instead.
     final hero = ref.watch(heroProvider).value;
-    final images = hero?.images ?? const <String>[];
-    final useImages = images.isNotEmpty;
+    final remoteImages = hero?.images ?? const <String>[];
+    // The product design is a five-slide hero. If the admin has fewer than
+    // five valid images, keep the built-in five scenes instead of rotating an
+    // incomplete banner.
+    final useImages = remoteImages.length >= 5;
+    final images = useImages ? remoteImages.take(5).toList(growable: false) : const <String>[];
     _slideCount = useImages ? images.length : _heroSlides.length;
     final wantedInterval = hero?.intervalSec ?? 5;
     if (wantedInterval != _intervalSec) {
