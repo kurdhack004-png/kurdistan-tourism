@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -18,6 +19,7 @@ class LocationDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final languageCode = context.locale.languageCode;
     final inTrip = ref.watch(tripProvider).contains(location.id);
     final isFavorite = ref.watch(favoritesProvider).contains(location.id);
 
@@ -67,7 +69,7 @@ class LocationDetailScreen extends ConsumerWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          location.nameCkb,
+                          location.localizedName(languageCode),
                           style: Theme.of(context).textTheme.displayLarge,
                         ),
                       ),
@@ -108,7 +110,7 @@ class LocationDetailScreen extends ConsumerWidget {
                   Text('دەربارە', style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: AppSpacing.sm),
                   Text(
-                    location.descriptionCkb ?? 'هێشتا وردەکاری زیاتر بۆ ئەم شوێنە زیاد نەکراوە.',
+                    location.localizedDescription(languageCode) ?? 'details'.tr(),
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
                   const SizedBox(height: AppSpacing.xl),
