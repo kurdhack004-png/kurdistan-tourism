@@ -44,11 +44,7 @@ class _LocationsMapScreenState extends ConsumerState<LocationsMapScreen> {
           permission == LocationPermission.deniedForever) {
         return null;
       }
-      return await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.high,
-        ),
-      );
+      return await Geolocator.getCurrentPosition();
     } catch (_) {
       return null;
     }
@@ -204,13 +200,14 @@ class _LocationsMapScreenState extends ConsumerState<LocationsMapScreen> {
   Future<void> _plotMarkers() async {
     final controller = _mapController;
     if (controller == null) return;
+    final languageCode = context.locale.languageCode;
     try {
       await controller.clearSymbols();
       for (final location in _locations) {
         await controller.addSymbol(
           SymbolOptions(
             geometry: LatLng(location.latitude, location.longitude),
-            textField: location.localizedName(context.locale.languageCode),
+            textField: location.localizedName(languageCode),
             textSize: 11,
             textOffset: const Offset(0, 1.6),
             textColor: '#12452F',
