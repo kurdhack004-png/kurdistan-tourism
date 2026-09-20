@@ -56,7 +56,7 @@ class EmergencyScreen extends ConsumerWidget {
     var permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) permission = await Geolocator.requestPermission();
     if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
-      if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('location_permission'.tr())));
+      if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('location_permission'.tr())));
       return;
     }
     final pos = await Geolocator.getCurrentPosition();
