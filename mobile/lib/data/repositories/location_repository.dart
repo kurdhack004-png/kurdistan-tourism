@@ -12,7 +12,9 @@ class LocationRepository {
   Future<List<TouristLocation>> nearby({
     required double lat,
     required double lng,
-    double radiusMeters = 10000,
+    // 1000 km: covers the whole Kurdistan Region, so every place added in the
+    // admin shows up (results are still sorted by distance from lat/lng).
+    double radiusMeters = 1000000,
   }) async {
     try {
       final res = await _api.client.get('/locations', queryParameters: {
