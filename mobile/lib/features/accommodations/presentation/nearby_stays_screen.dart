@@ -73,7 +73,7 @@ class NearbyStaysScreen extends ConsumerWidget {
                   ),
                   title: Text(a.nameCkb),
                   subtitle: Text(
-                    '${a.type} • ${a.pricePerNight.toStringAsFixed(0)} د.ع/شەو',
+                    '${_typeLabel(a.type)} • ${a.pricePerNight.toStringAsFixed(0)} ${'iqd'.tr()}${'per_night_label'.tr()}',
                   ),
                   trailing: FilledButton(
                     onPressed: () => _startBooking(
@@ -95,11 +95,29 @@ class NearbyStaysScreen extends ConsumerWidget {
         ),
         error: (e, st) => Center(
           child: Text(
-            'نەتوانرا شوێنی مانەوە بار بکرێن',
+            'accommodation_load_failed'.tr(),
             style: Theme.of(context).textTheme.bodyMedium,
           ),
         ),
       ),
     );
+  }
+
+  String _typeLabel(String type) {
+    final key = type.toLowerCase().replaceAll('-', '');
+    switch (key) {
+      case 'hotel':
+        return 'hotel'.tr();
+      case 'house':
+        return 'house'.tr();
+      case 'cabin':
+        return 'cabin'.tr();
+      case 'chalet':
+        return 'chalet'.tr();
+      case 'guesthouse':
+        return 'guesthouse'.tr();
+      default:
+        return type;
+    }
   }
 }
