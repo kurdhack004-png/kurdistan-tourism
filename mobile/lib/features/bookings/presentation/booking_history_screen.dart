@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../providers/booking_provider.dart';
@@ -12,12 +13,12 @@ class BookingHistoryScreen extends ConsumerWidget {
     final bookings = ref.watch(bookingProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('حجزەکانم')),
+      appBar: AppBar(title: Text('my_bookings'.tr())),
       body: bookings.when(
         data: (items) {
           if (items.isEmpty) {
             return const Center(
-              child: Text('هێشتا هیچ حجزێکت نییە.', style: TextStyle(color: AppColors.riverstone)));
+              child: Text('bookings_empty'.tr(), style: const TextStyle(color: AppColors.riverstone)));
           }
           return RefreshIndicator(
             onRefresh: () => ref.read(bookingProvider.notifier).refresh(),
@@ -30,7 +31,11 @@ class BookingHistoryScreen extends ConsumerWidget {
                   margin: const EdgeInsets.only(bottom: AppSpacing.sm),
                   child: ListTile(
                     title: Text(b.accommodationName),
-                    subtitle: Text('${_fmt(b.checkIn)} → ${_fmt(b.checkOut)} • ${b.guests} میوان'),
+                    subtitle: Text('booking_dates_guests'.tr(namedArgs: {
+                      'checkIn': _fmt(b.checkIn),
+                      'checkOut': _fmt(b.checkOut),
+                      'guests': b.guests.toString(),
+                    })),
                     trailing: _StatusChip(status: b.status),
                   ),
                 );
@@ -40,7 +45,7 @@ class BookingHistoryScreen extends ConsumerWidget {
         },
         loading: () => const Center(child: CircularProgressIndicator(color: AppColors.saffron)),
         error: (e, st) => Center(
-          child: Text('نەتوانرا حجزەکان بار بکرێن', style: Theme.of(context).textTheme.bodyMedium)),
+          child: Text('bookings_load_failed'.tr(), style: Theme.of(context).textTheme.bodyMedium)),
       ),
     );
   }
@@ -55,10 +60,10 @@ class _StatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final labels = {
-      'pending': 'چاوەڕوان',
-      'confirmed': 'پ��تڕاستکراوە',
-      'cancelled': 'هەڵوەشێنراوە',
-      'completed': 'تەواوبووە',
+      'pending': 'status_pending'.tr(),
+      'confirmed': 'status_confirmed'.tr(),
+      'cancelled': 'status_cancelled'.tr(),
+      'completed': 'status_completed'.tr(),
     };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
