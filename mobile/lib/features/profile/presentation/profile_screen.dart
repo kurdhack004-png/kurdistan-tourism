@@ -87,7 +87,7 @@ class ProfileScreen extends ConsumerWidget {
               onTap: () async {
                 await ref.read(authProvider.notifier).logout();
                 if (!context.mounted) return;
-                setState(() {});
+                // authProvider state change rebuilds this ConsumerWidget.
               },
             ),
         ],
