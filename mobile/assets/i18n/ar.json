@@ -47,5 +47,20 @@
   "auth_login_failed": "فشل تسجيل الدخول. إذا لم يكن الخادم يعمل، أنشئ حساباً جديداً أولاً.",
   "register_account": "إنشاء حساب",
   "no_account_register": "ليس لديك حساب؟ أنشئ حساباً",
-  "app_slogan": "اكتشف كردستان"
+  "app_slogan": "اكتشف كردستان",
+  "all": "الكل",
+  "mountains": "الجبال",
+  "lakes": "البحيرات",
+  "caves": "الكهوف",
+  "waterfalls": "الشلالات",
+  "hero_mountains": "جبال كردستان",
+  "hero_lakes": "البحيرات الطبيعية",
+  "hero_waterfalls": "الشلالات الجميلة",
+  "hero_caves": "الكهوف التاريخية",
+  "hero_history": "المواقع الثقافية",
+  "region_title": "منطقة أربيل",
+  "locations_available": "{count} من الأماكن السياحية متاحة",
+  "loading_places": "جارٍ تحميل الأماكن...",
+  "ad": "إعلان",
+  "search_hint": "ابحث عن الأماكن أو الجبال..."
 }
