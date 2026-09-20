@@ -316,9 +316,10 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen>
                 } else {
                   await api.patch('/admin/ads/${item['id']}', data: payload);
                 }
-                if (!context.mounted) return;
+                if (!mounted) return;
                 Navigator.pop(context);
-                _message('admin_saved'.tr());
+                if (!mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('admin_saved'.tr())));
                 await _refresh();
               } catch (_) { _message('admin_save_failed'.tr(), error: true); }
             },
