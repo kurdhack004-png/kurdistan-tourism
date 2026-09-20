@@ -82,8 +82,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         state = state.copyWith(
           isLoading: false,
           isAuthenticated: false,
-          error:
-              'چوونەژوورەوە سەرکەوتوو نەبوو. ئەگەر Backend ـت نەخستووەتە کار، سەرەتا هەژمارێکی نوێ دروست بکە.',
+          error: 'auth_login_failed',
           isLocalMode: false,
         );
       }
