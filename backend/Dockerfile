@@ -11,7 +11,7 @@ RUN apt-get update \
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Start from a clean Laravel 11 runtime, then layer the repository application code.
-RUN composer create-project laravel/laravel:^11.0 /tmp/laravel --no-interaction --prefer-dist \
+RUN composer create-project laravel/laravel:^12.0 /tmp/laravel --no-interaction --prefer-dist \
     && cd /tmp/laravel \
     && php artisan install:api --no-interaction
 
