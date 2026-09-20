@@ -114,5 +114,17 @@
   "cabin": "Cabin",
   "chalet": "Chalet",
   "guesthouse": "Guesthouse",
-  "per_night_label": "/ night"
+  "per_night_label": "/ night",
+  "favorites_empty": "You have no favorite places yet.",
+  "favorites_load_failed": "Could not load favorites.",
+  "review_title": "Review for {title}",
+  "reviews_load_failed": "Could not load reviews.",
+  "booking_guests_summary": "{name} • {guests} guests",
+  "bookings_empty": "You have no bookings yet.",
+  "bookings_load_failed": "Could not load bookings.",
+  "booking_dates_guests": "{checkIn} → {checkOut} • {guests} guests",
+  "status_pending": "Pending",
+  "status_confirmed": "Confirmed",
+  "status_cancelled": "Cancelled",
+  "status_completed": "Completed"
 }
