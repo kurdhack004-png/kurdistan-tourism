@@ -17,7 +17,7 @@ class EmergencyScreen extends ConsumerWidget {
     final contacts = ref.watch(emergencyProvider).value ?? kDefaultEmergencyContacts;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('emergency'.tr())),
+      appBar: AppBar(title: Text('emergency'.tr())),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
@@ -46,7 +46,7 @@ class EmergencyScreen extends ConsumerWidget {
               ),
             ),
           const SizedBox(height: AppSpacing.md),
-          FilledButton.icon(onPressed: () => _shareLocation(context), icon: const Icon(Icons.my_location_rounded, size: 18), label: const Text('share_location'.tr())),
+          FilledButton.icon(onPressed: () => _shareLocation(context), icon: const Icon(Icons.my_location_rounded, size: 18), label: Text('share_location'.tr())),
         ],
       ),
     );
