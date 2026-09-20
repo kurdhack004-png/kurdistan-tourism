@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_colors.dart';
 import '../models/tourist_location.dart';
 import '../providers/locations_provider.dart';
@@ -20,65 +22,181 @@ class _LocationsMapScreenState extends ConsumerState<LocationsMapScreen> {
   MapLibreMapController? _mapController;
   List<TouristLocation> _locations = const [];
   bool _mapFailed = false;
+  bool _locating = false;
 
   @override
   void initState() {
     super.initState();
     final l = widget.focusLocation;
-    _center = l == null ? const LatLng(36.1911, 44.0092) : LatLng(l.latitude, l.longitude);
+    _center = l == null
+        ? const LatLng(36.1911, 44.0092)
+        : LatLng(l.latitude, l.longitude);
     if (l == null) _resolveCurrentPosition();
   }
 
-  Future<void> _resolveCurrentPosition() async {
+  Future<Position?> _getCurrentPosition() async {
     try {
       var permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) return;
-      final pos = await Geolocator.getCurrentPosition();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        return null;
+      }
+      return await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+        ),
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> _resolveCurrentPosition() async {
+    if (_locating) return;
+    setState(() => _locating = true);
+    final pos = await _getCurrentPosition();
+    if (!mounted) return;
+    setState(() {
+      _locating = false;
+      if (pos != null) {
+        _center = LatLng(pos.latitude, pos.longitude);
+      }
+    });
+    if (pos != null && _mapController != null) {
+      await _mapController!.animateCamera(
+        CameraUpdate.newLatLngZoom(
+          LatLng(pos.latitude, pos.longitude),
+          12,
+        ),
+      );
+    }
+  }
+
+  Future<void> _openDirections(TouristLocation location) async {
+    final uri = Uri.parse(
+      'https://www.google.com/maps/dir/?api=1&destination='
+      '${location.latitude},${location.longitude}',
+    );
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
       if (!mounted) return;
-      setState(() => _center = LatLng(pos.latitude, pos.longitude));
-    } catch (_) {}
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('نەتوانرا نەخشەی ڕێنمایی بکرێتەوە.')),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final nearby = ref.watch(nearbyLocationsProvider(NearbyParams(_center.latitude, _center.longitude)));
+    final nearby = ref.watch(
+      nearbyLocationsProvider(
+        NearbyParams(_center.latitude, _center.longitude),
+      ),
+    );
+
     return Scaffold(
-      appBar: AppBar(title: const Text('شوێنە گەشتیارییەکان')),
+      appBar: AppBar(title: Text('tourism_places'.tr())),
       body: nearby.when(
         data: (items) {
           _locations = items;
-          return Stack(children: [
-            if (!_mapFailed)
-              MapLibreMap(
-                styleString: 'https://demotiles.maplibre.org/style.json',
-                initialCameraPosition: CameraPosition(target: _center, zoom: widget.focusLocation == null ? 8.5 : 12),
-                onMapCreated: (c) => _mapController = c,
-                onStyleLoadedCallback: _plotMarkers,
-                onMapClick: (_, __) {},
-              )
-            else
-              _MapFallback(locations: items, onTap: (l) => _openLocation(l)),
-            if (!_mapFailed)
-              Positioned(
-                left: 16, right: 16, bottom: 16,
-                child: Card(
-                  margin: EdgeInsets.zero,
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Row(children: [
-                      const Icon(Icons.place_rounded, color: AppColors.saffron),
-                      const SizedBox(width: 8),
-                      Expanded(child: Text('${items.length} شوێنی گەشتیاری لەم ناوچەیەدا', maxLines: 1, overflow: TextOverflow.ellipsis)),
-                      IconButton(onPressed: items.isEmpty ? null : () => _openLocation(items.first), icon: const Icon(Icons.chevron_left_rounded)),
-                    ]),
+          return Stack(
+            children: [
+              if (!_mapFailed)
+                MapLibreMap(
+                  styleString: 'https://demotiles.maplibre.org/style.json',
+                  initialCameraPosition: CameraPosition(
+                    target: _center,
+                    zoom: widget.focusLocation == null ? 8.5 : 12,
+                  ),
+                  myLocationEnabled: true,
+                  onMapCreated: (c) => _mapController = c,
+                  onStyleLoadedCallback: _plotMarkers,
+                  onMapClick: (_, __) {},
+                )
+              else
+                _MapFallback(
+                  locations: items,
+                  onTap: (l) => _openLocation(l),
+                ),
+              if (!_mapFailed)
+                Positioned(
+                  right: 12,
+                  top: 12,
+                  child: Column(
+                    children: [
+                      FloatingActionButton.small(
+                        heroTag: 'my-location',
+                        onPressed: _locating ? null : _resolveCurrentPosition,
+                        tooltip: 'my_location'.tr(),
+                        child: _locating
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Icon(Icons.my_location_rounded),
+                      ),
+                      const SizedBox(height: 8),
+                      if (widget.focusLocation != null)
+                        FloatingActionButton.small(
+                          heroTag: 'directions',
+                          onPressed: () => _openDirections(widget.focusLocation!),
+                          tooltip: 'directions'.tr(),
+                          child: const Icon(Icons.directions_rounded),
+                        ),
+                    ],
                   ),
                 ),
-              ),
-          ]);
+              if (!_mapFailed)
+                Positioned(
+                  left: 16,
+                  right: 16,
+                  bottom: 16,
+                  child: Card(
+                    margin: EdgeInsets.zero,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.place_rounded,
+                            color: AppColors.saffron,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              '${items.length} شوێنی گەشتیاری لەم ناوچەیەدا',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (items.isNotEmpty)
+                            IconButton(
+                              tooltip: 'directions'.tr(),
+                              onPressed: () => _openDirections(items.first),
+                              icon: const Icon(Icons.directions_rounded),
+                            ),
+                          IconButton(
+                            tooltip: 'details'.tr(),
+                            onPressed: items.isEmpty
+                                ? null
+                                : () => _openLocation(items.first),
+                            icon: const Icon(Icons.chevron_left_rounded),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) => const Center(child: Text('نەتوانرا داتای شوێنەکان بخوێندرێتەوە.')),
+        error: (_, __) => const Center(
+          child: Text('نەتوانرا داتای شوێنەکان بخوێندرێتەوە.'),
+        ),
       ),
     );
   }
@@ -89,15 +207,18 @@ class _LocationsMapScreenState extends ConsumerState<LocationsMapScreen> {
     try {
       await controller.clearSymbols();
       for (final location in _locations) {
-        await controller.addSymbol(SymbolOptions(
-          geometry: LatLng(location.latitude, location.longitude),
-          textField: location.nameCkb,
-          textSize: 11,
-          textOffset: const Offset(0, 1.6),
-          textColor: '#12452F',
-          textHaloColor: '#FFFFFF',
-          textHaloWidth: 1,
-        ), {'id': location.id});
+        await controller.addSymbol(
+          SymbolOptions(
+            geometry: LatLng(location.latitude, location.longitude),
+            textField: location.localizedName(context.locale.languageCode),
+            textSize: 11,
+            textOffset: const Offset(0, 1.6),
+            textColor: '#12452F',
+            textHaloColor: '#FFFFFF',
+            textHaloWidth: 1,
+          ),
+          {'id': location.id},
+        );
       }
       controller.onSymbolTapped.add((symbol) {
         final id = symbol.data?['id'] as String?;
@@ -114,7 +235,11 @@ class _LocationsMapScreenState extends ConsumerState<LocationsMapScreen> {
   }
 
   void _openLocation(TouristLocation location) {
-    Navigator.of(context).push(MaterialPageRoute(builder: (_) => LocationDetailScreen(location: location)));
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => LocationDetailScreen(location: location),
+      ),
+    );
   }
 }
 
@@ -129,13 +254,20 @@ class _MapFallback extends StatelessWidget {
         itemCount: locations.length,
         itemBuilder: (_, i) {
           final l = locations[i];
-          return Card(child: ListTile(
-            leading: const CircleAvatar(child: Icon(Icons.place_outlined)),
-            title: Text(l.nameCkb),
-            subtitle: Text('${l.latitude.toStringAsFixed(4)}, ${l.longitude.toStringAsFixed(4)}'),
-            trailing: const Icon(Icons.chevron_left_rounded),
-            onTap: () => onTap(l),
-          ));
+          return Card(
+            child: ListTile(
+              leading: const CircleAvatar(
+                child: Icon(Icons.place_outlined),
+              ),
+              title: Text(l.localizedName(context.locale.languageCode)),
+              subtitle: Text(
+                '${l.latitude.toStringAsFixed(4)}, '
+                '${l.longitude.toStringAsFixed(4)}',
+              ),
+              trailing: const Icon(Icons.chevron_left_rounded),
+              onTap: () => onTap(l),
+            ),
+          );
         },
       );
 }

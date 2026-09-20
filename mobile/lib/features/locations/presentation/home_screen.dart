@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_colors.dart';
@@ -17,18 +18,18 @@ import 'widgets/category_tab_bar.dart';
 import 'widgets/location_card.dart';
 import 'location_detail_screen.dart';
 
-const _categories = ['هەموو', 'کێوەکان', 'دەریاچە', 'ئەشکەوت', 'دابەزین'];
+const _categories = ['all', 'mountains', 'lakes', 'caves', 'waterfalls'];
 
 /// The 5 scenes the hero banner cycles through, one every 5 seconds.
 /// These reuse the same category icon/gradient language as the rest of
 /// the app (see `categoryVisual`) rather than stock photos, so the
 /// rotation stays on-brand and needs no network access to render.
 const _heroSlides = [
-  ('mountain', 'چیاکانی کوردستان'),
-  ('lake', 'دەریاچە سروشتییەکان'),
-  ('waterfall', 'ئاودانە جوانەکان'),
-  ('cave', 'ئەشکەوتە مێژووییەکان'),
-  ('history', 'شوێنە کلتوورییەکان'),
+  ('mountain', 'hero_mountains'),
+  ('lake', 'hero_lakes'),
+  ('waterfall', 'hero_waterfalls'),
+  ('cave', 'hero_caves'),
+  ('history', 'hero_history'),
 ];
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -44,6 +45,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final languageCode = context.locale.languageCode;
     // Erbil as the default center — the repository already falls back to
     // cached/offline data when there's no connection.
     final nearby = ref.watch(nearbyLocationsProvider(const NearbyParams(36.1911, 44.0092)));
@@ -83,10 +85,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               final filtered = items.where((loc) {
                 final q = _query.toLowerCase();
                 final matchesSearch = q.isEmpty ||
-                    loc.nameCkb.toLowerCase().contains(q) ||
-                    (loc.descriptionCkb?.toLowerCase().contains(q) ?? false);
-                if (_selectedCategory == 'هەموو') return matchesSearch;
-                final category = _selectedCategory == 'کێوەکان' ? 'mountain' : _selectedCategory == 'دەریاچە' ? 'lake' : _selectedCategory == 'ئەشکەوت' ? 'cave' : 'waterfall';
+                    loc.localizedName(languageCode).toLowerCase().contains(q) ||
+                    (loc.localizedDescription(languageCode)?.toLowerCase().contains(q) ?? false);
+                if (_selectedCategory == 'all') return matchesSearch;
+                final category = _selectedCategory == 'mountains' ? 'mountain' : _selectedCategory == 'lakes' ? 'lake' : _selectedCategory == 'caves' ? 'cave' : 'waterfall';
                 final matchesCategory = loc.category == category;
                 return matchesSearch && matchesCategory;
               }).toList();
@@ -110,7 +112,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     // name only instead of taking down the whole list.
                     fallback: Padding(
                       padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-                      child: Text(loc.nameCkb, style: Theme.of(context).textTheme.bodyMedium),
+                      child: Text(loc.localizedName(languageCode), style: Theme.of(context).textTheme.bodyMedium),
                     ),
                   );
                 },
@@ -248,7 +250,7 @@ class _HeroState extends ConsumerState<_Hero> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('گەشتیاری کوردستان',
+                    Text('app_slogan'.tr(),
                         style: TextStyle(color: AppColors.limestoneWhite, fontSize: 14, fontWeight: FontWeight.w500)),
                     Row(
                       children: [
@@ -277,21 +279,21 @@ class _HeroState extends ConsumerState<_Hero> {
                       AnimatedSwitcher(
                         duration: const Duration(milliseconds: 500),
                         child: Text(
-                          label,
+                          label.tr(),
                           key: ValueKey(label),
                           style: const TextStyle(color: AppColors.saffron, fontSize: 12, fontWeight: FontWeight.w600),
                         ),
                       ),
                       const SizedBox(height: 6),
                     ],
-                    Text('شاخەکانی هەولێر',
+                    Text('region_title'.tr(),
                         style: Theme.of(context)
                             .textTheme
                             .displayLarge
                             ?.copyWith(color: AppColors.limestoneWhite, fontSize: 22)),
                     const SizedBox(height: 4),
                     Text(
-                      widget.count == null ? 'بارکردنی شوێنەکان...' : '${widget.count} شوێنی گەشتیاری بەردەستە',
+                      widget.count == null ? 'loading_places'.tr() : 'locations_available'.tr(namedArgs: {'count': widget.count.toString()}),
                       style: const TextStyle(color: Color(0xFFC9C2AA), fontSize: 12),
                     ),
                   ],
@@ -396,7 +398,7 @@ class _AdCard extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                   decoration: BoxDecoration(color: AppColors.saffron, borderRadius: BorderRadius.circular(6)),
-                  child: const Text('بانگەشە', style: TextStyle(fontSize: 10, color: AppColors.ink, fontWeight: FontWeight.w600)),
+                  child: Text('ad'.tr(), style: TextStyle(fontSize: 10, color: AppColors.ink, fontWeight: FontWeight.w600)),
                 ),
               ),
               PositionedDirectional(
@@ -440,7 +442,7 @@ class _SearchField extends StatelessWidget {
     return TextField(
       onChanged: onChanged,
       decoration: InputDecoration(
-        hintText: 'گەڕان بۆ شوێن یان چیاکان...',
+        hintText: 'search_hint'.tr(),
         hintStyle: const TextStyle(color: AppColors.riverstone, fontSize: 13),
         prefixIcon: const Icon(Icons.search_rounded, color: AppColors.riverstone, size: 20),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppSpacing.chipRadius)),

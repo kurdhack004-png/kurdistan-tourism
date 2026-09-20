@@ -23,17 +23,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     await ref.read(authProvider.notifier).ready;
     if (!mounted) return;
 
-    // TEMPORARY: skip onboarding and login entirely, and guarantee an
-    // authenticated (local demo) session so the dashboard has a valid
-    // auth state to work with. Remove this bypass once login/backend
-    // are ready and you want the normal onboarding -> login flow back.
-    final auth = ref.read(authProvider);
-    if (!auth.isAuthenticated) {
-      await ref.read(authProvider.notifier).bypassForTesting();
-    }
-
-    if (!mounted) return;
-    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const MainShell()));
+    // Guest mode: opening the app never creates a fake authenticated session.
+    // Authentication is requested only when the user starts a protected flow
+    // such as accommodation booking/payment.
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const MainShell()),
+    );
   }
 
   @override
@@ -46,8 +41,14 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
           children: [
             Icon(Icons.terrain_rounded, size: 56, color: AppColors.saffron),
             SizedBox(height: 16),
-            Text('گەشتیاری کوردستان',
-                style: TextStyle(color: AppColors.limestoneWhite, fontSize: 18, fontWeight: FontWeight.w600)),
+            Text(
+              'گەشتیاری کوردستان',
+              style: TextStyle(
+                color: AppColors.limestoneWhite,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ],
         ),
       ),
