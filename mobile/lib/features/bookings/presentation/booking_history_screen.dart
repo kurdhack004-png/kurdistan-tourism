@@ -17,7 +17,7 @@ class BookingHistoryScreen extends ConsumerWidget {
       body: bookings.when(
         data: (items) {
           if (items.isEmpty) {
-            return const Center(
+            return Center(
               child: Text('bookings_empty'.tr(), style: const TextStyle(color: AppColors.riverstone)));
           }
           return RefreshIndicator(
