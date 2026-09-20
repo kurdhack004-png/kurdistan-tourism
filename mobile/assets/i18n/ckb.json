@@ -107,5 +107,12 @@
   "hotels": "هۆتێل و شوێنی مانەوە",
   "booking_fee": "کرێی حجز",
   "service_fee": "کرێی خزمەتگوزاری",
-  "pending_payment": "پارەدان هێشتا پشتڕاست نەکراوەتەوە."
+  "pending_payment": "پارەدان هێشتا پشتڕاست نەکراوەتەوە.",
+  "accommodation_load_failed": "نەتوانرا شوێنی مانەوە بار بکرێن",
+  "hotel": "هۆتێل",
+  "house": "ماڵ",
+  "cabin": "کابین",
+  "chalet": "شالێ",
+  "guesthouse": "میوانخانە",
+  "per_night_label": "/شەو"
 }
