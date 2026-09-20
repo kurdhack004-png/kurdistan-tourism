@@ -18,6 +18,16 @@ class LocationsMapScreen extends ConsumerStatefulWidget {
 }
 
 class _LocationsMapScreenState extends ConsumerState<LocationsMapScreen> {
+  static const _mapStyleUrl = String.fromEnvironment(
+    'MAP_STYLE_URL',
+    defaultValue: 'https://demotiles.maplibre.org/style.json',
+  );
+  static const _mapApiKey = String.fromEnvironment('MAP_API_KEY');
+
+  String get _resolvedMapStyleUrl {
+    if (_mapApiKey.isEmpty) return _mapStyleUrl;
+    return _mapStyleUrl.replaceAll('{MAP_API_KEY}', Uri.encodeQueryComponent(_mapApiKey));
+  }
   late LatLng _center;
   MapLibreMapController? _mapController;
   List<TouristLocation> _locations = const [];
@@ -103,7 +113,7 @@ class _LocationsMapScreenState extends ConsumerState<LocationsMapScreen> {
             children: [
               if (!_mapFailed)
                 MapLibreMap(
-                  styleString: 'https://demotiles.maplibre.org/style.json',
+                  styleString: _resolvedMapStyleUrl,
                   initialCameraPosition: CameraPosition(
                     target: _center,
                     zoom: widget.focusLocation == null ? 8.5 : 12,
