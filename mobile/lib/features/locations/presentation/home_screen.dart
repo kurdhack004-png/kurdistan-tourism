@@ -45,6 +45,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final languageCode = context.locale.languageCode;
     // Erbil as the default center — the repository already falls back to
     // cached/offline data when there's no connection.
     final nearby = ref.watch(nearbyLocationsProvider(const NearbyParams(36.1911, 44.0092)));
@@ -84,8 +85,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               final filtered = items.where((loc) {
                 final q = _query.toLowerCase();
                 final matchesSearch = q.isEmpty ||
-                    loc.nameCkb.toLowerCase().contains(q) ||
-                    (loc.descriptionCkb?.toLowerCase().contains(q) ?? false);
+                    loc.localizedName(languageCode).toLowerCase().contains(q) ||
+                    (loc.localizedDescription(languageCode)?.toLowerCase().contains(q) ?? false);
                 if (_selectedCategory == 'all') return matchesSearch;
                 final category = _selectedCategory == 'mountains' ? 'mountain' : _selectedCategory == 'lakes' ? 'lake' : _selectedCategory == 'caves' ? 'cave' : 'waterfall';
                 final matchesCategory = loc.category == category;
@@ -111,7 +112,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     // name only instead of taking down the whole list.
                     fallback: Padding(
                       padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-                      child: Text(loc.nameCkb, style: Theme.of(context).textTheme.bodyMedium),
+                      child: Text(loc.localizedName(languageCode), style: Theme.of(context).textTheme.bodyMedium),
                     ),
                   );
                 },
