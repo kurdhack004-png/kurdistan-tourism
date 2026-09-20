@@ -40,9 +40,9 @@ class TouristLocation {
   String localizedName(String languageCode) {
     switch (languageCode) {
       case 'en':
-        return nameEn?.trim().isNotEmpty == true ? nameEn! : nameCkb;
+        return nameEn?.trim().isNotEmpty == true ? nameEn! : 'Tourist place';
       case 'ar':
-        return nameAr?.trim().isNotEmpty == true ? nameAr! : nameCkb;
+        return nameAr?.trim().isNotEmpty == true ? nameAr! : 'مكان سياحي';
       default:
         return nameCkb;
     }
@@ -51,13 +51,9 @@ class TouristLocation {
   String? localizedDescription(String languageCode) {
     switch (languageCode) {
       case 'en':
-        return descriptionEn?.trim().isNotEmpty == true
-            ? descriptionEn
-            : descriptionCkb;
+        return descriptionEn?.trim().isNotEmpty == true ? descriptionEn : 'Explore this tourist place.';
       case 'ar':
-        return descriptionAr?.trim().isNotEmpty == true
-            ? descriptionAr
-            : descriptionCkb;
+        return descriptionAr?.trim().isNotEmpty == true ? descriptionAr : 'استكشف هذا المكان السياحي.';
       default:
         return descriptionCkb;
     }
@@ -94,7 +90,7 @@ class TouristLocation {
             json['name_ku'],
             json['name'],
           ]) ??
-          'شوێنی گەشتیاری',
+          'Tourist place',
       nameAr: _firstText([json['name_ar'], json['name_arabic']]),
       nameEn: _firstText([json['name_en'], json['name']]),
       longitude: lng,
