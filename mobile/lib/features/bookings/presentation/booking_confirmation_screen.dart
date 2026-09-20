@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../models/booking.dart';
@@ -21,7 +22,7 @@ class BookingConfirmationScreen extends StatelessWidget {
               children: [
                 const Icon(Icons.check_circle_rounded, color: AppColors.clay, size: 84),
                 const SizedBox(height: AppSpacing.lg),
-                Text('حجزەکەت پشتڕاست کرایەوە!', style: Theme.of(context).textTheme.displayLarge,
+                Text('booking_confirmed'.tr(), style: Theme.of(context).textTheme.displayLarge,
                     textAlign: TextAlign.center),
                 const SizedBox(height: AppSpacing.sm),
                 Text(
@@ -35,7 +36,7 @@ class BookingConfirmationScreen extends StatelessWidget {
                   child: FilledButton(
                     onPressed: () => Navigator.of(context).pushAndRemoveUntil(
                       MaterialPageRoute(builder: (_) => const MainShell()), (route) => false),
-                    child: const Text('گەڕانەوە بۆ ئەپ'),
+                    child: Text('back_to_app'.tr()),
                   ),
                 ),
               ],
