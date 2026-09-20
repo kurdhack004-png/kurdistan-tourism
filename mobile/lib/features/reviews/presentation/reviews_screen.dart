@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../providers/reviews_provider.dart';
+import '../../auth/presentation/login_screen.dart';
+import '../../auth/providers/auth_provider.dart';
 
 class ReviewsScreen extends ConsumerWidget {
   const ReviewsScreen({super.key, required this.reviewableType, required this.reviewableId, required this.title});
@@ -66,6 +68,12 @@ class ReviewsScreen extends ConsumerWidget {
   }
 
   void _openWriteReviewSheet(BuildContext context, WidgetRef ref, (String, String) key) {
+    if (!ref.read(authProvider).isAuthenticated) {
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      );
+      return;
+    }
     int rating = 5;
     final commentCtrl = TextEditingController();
 
