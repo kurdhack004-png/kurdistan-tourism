@@ -1,1 +1,336 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Kurdistan Tourism Admin</title><style>body{margin:0;font-family:Inter,Arial;background:#f4f7fb;color:#182230}.top{background:#102a43;color:#fff;padding:18px 24px;display:flex;justify-content:space-between}.wrap{max-width:1200px;margin:24px auto;padding:0 16px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}.card{background:#fff;border-radius:16px;padding:20px;box-shadow:0 5px 20px #102a4314}.num{font-size:30px;font-weight:800}.login{max-width:420px;margin:80px auto}.input{width:100%;box-sizing:border-box;padding:12px;margin:7px 0;border:1px solid #ccd6e0;border-radius:10px}.btn{padding:12px 16px;border:0;border-radius:10px;background:#1677ff;color:#fff;font-weight:700;cursor:pointer}.danger{background:#d83a3a}.muted{color:#66788a}.row{display:flex;gap:10px;align-items:center;justify-content:space-between}.hidden{display:none}@media(max-width:800px){.grid{grid-template-columns:1fr 1fr}}</style></head><body><div class="top"><b>🏔️ Kurdistan Tourism Admin</b><button class="btn" onclick="logout()">Logout</button></div><div id="login" class="login card"><h2>Admin Login</h2><input id="api" class="input" placeholder="API URL" value="http://localhost:8000/api"><input id="email" class="input" placeholder="Admin email"><input id="pass" class="input" type="password" placeholder="Admin password"><button class="btn" onclick="login()">Login</button><p id="msg" class="muted"></p></div><main id="app" class="wrap hidden"><div class="grid"><div class="card"><div class="muted">Users</div><div id="users" class="num">-</div></div><div class="card"><div class="muted">Locations</div><div id="locations" class="num">-</div></div><div class="card"><div class="muted">Bookings</div><div id="bookings" class="num">-</div></div><div class="card"><div class="muted">Revenue</div><div id="revenue" class="num">-</div></div></div><div class="card" style="margin-top:20px"><div class="row"><h2>API Status</h2><span id="status">Checking...</span></div><p class="muted">Use the backend API for locations, bookings, reviews, favorites and AI. This dashboard is intentionally dependency-free.</p></div></main><script>let API=localStorage.getItem('kt_api')||'http://localhost:8000/api';async function login(){API=(document.getElementById('api').value||'http://localhost:8000/api').replace(/\/$/,'');localStorage.kt_api=API;const r=await fetch(API+'/auth/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email:email.value,password:pass.value})});const j=await r.json();if(j.success&&j.data.user.role==='admin'){localStorage.token=j.data.token;show()}else msg.textContent=j.message||'Admin login failed'}async function show(){loginEl=document.getElementById('login');loginEl.classList.add('hidden');document.getElementById('app').classList.remove('hidden');const r=await fetch(API+'/admin/stats',{headers:{Authorization:'Bearer '+localStorage.token}});const j=await r.json();if(j.success){users.textContent=j.data.users;locations.textContent=j.data.locations;bookings.textContent=j.data.bookings;revenue.textContent='$'+j.data.revenue;status.textContent='ONLINE'}else status.textContent='API ERROR'}function logout(){localStorage.removeItem('token');location.reload()}if(localStorage.token)show()</script></body></html>
+<!doctype html>
+<html lang="ckb" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kurdistan Tourism Admin</title>
+<style>
+:root{--bg:#f4f7fb;--card:#fff;--ink:#182230;--muted:#66788a;--line:#e1e8f0;--brand:#102a43;--accent:#1677ff;--danger:#d83a3a;--ok:#1a9d5c;--warn:#d98a00}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,"Noto Naskh Arabic","Segoe UI",Tahoma,Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:15px}
+button,input,select,textarea{font:inherit;color:inherit}
+.hidden{display:none!important}
+.muted{color:var(--muted)}
+/* login */
+.login{max-width:420px;margin:70px auto;padding:0 16px}
+.card{background:var(--card);border-radius:16px;padding:20px;box-shadow:0 5px 20px #102a4314}
+.login h2{margin-top:0}
+/* layout */
+.shell{display:flex;min-height:100vh}
+.side{width:230px;background:var(--brand);color:#fff;padding:16px 10px;flex-shrink:0;display:flex;flex-direction:column;gap:4px}
+.side .brand{font-weight:800;padding:8px 12px 14px;font-size:16px}
+.side button.nav{background:none;border:0;color:#cfe0f3;text-align:start;padding:10px 12px;border-radius:10px;cursor:pointer;font-size:15px}
+.side button.nav:hover{background:#ffffff14}
+.side button.nav.on{background:#ffffff26;color:#fff;font-weight:700}
+.side .sp{flex:1}
+main{flex:1;padding:22px;min-width:0}
+.head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.head h1{margin:0;font-size:22px}
+.hint{margin:0 0 14px;color:var(--muted);font-size:13px}
+/* controls */
+.btn{padding:9px 14px;border:0;border-radius:10px;background:var(--accent);color:#fff;font-weight:700;cursor:pointer}
+.btn.ghost{background:#e8eef6;color:var(--ink)}
+.btn.danger{background:var(--danger)}
+.btn.sm{padding:5px 10px;font-size:13px;border-radius:8px}
+.btn:disabled{opacity:.6;cursor:wait}
+.input,select.input,textarea.input{width:100%;padding:10px 12px;border:1px solid #ccd6e0;border-radius:10px;background:#fff}
+textarea.input{min-height:84px;resize:vertical}
+label.f{display:block;margin-bottom:12px;font-weight:600;font-size:13px}
+label.f>.input,label.f>div{margin-top:5px;font-weight:400}
+label.chk{display:flex;align-items:center;gap:8px;margin-bottom:12px;font-weight:600;font-size:13px}
+/* stats */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin-bottom:18px}
+.num{font-size:26px;font-weight:800;margin-top:4px}
+/* table */
+.tw{overflow-x:auto;background:var(--card);border-radius:16px;box-shadow:0 5px 20px #102a4314}
+table{width:100%;border-collapse:collapse;min-width:640px}
+th,td{padding:10px 12px;text-align:start;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);background:#fafcfe;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td .acts{display:flex;gap:6px;flex-wrap:wrap}
+.thumb{width:48px;height:36px;object-fit:cover;border-radius:6px;background:#e8eef6;display:block}
+.pill{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;font-weight:700;background:#e8eef6}
+.pill.ok{background:#dff5ea;color:var(--ok)}.pill.no{background:#fde8e8;color:var(--danger)}
+.cell-text{max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* modal */
+.ov{position:fixed;inset:0;background:#0a1a2c99;display:flex;align-items:flex-start;justify-content:center;padding:30px 12px;overflow:auto;z-index:20}
+.modal{background:#fff;border-radius:16px;width:100%;max-width:640px;padding:20px}
+.modal h3{margin-top:0}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+.row-end{display:flex;gap:10px;justify-content:flex-end;margin-top:8px}
+.imgs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.imgs .im{position:relative}
+.imgs .im img{width:84px;height:62px;object-fit:cover;border-radius:8px;display:block;background:#e8eef6}
+.imgs .im button{position:absolute;top:-6px;inset-inline-end:-6px;border:0;background:var(--danger);color:#fff;width:20px;height:20px;border-radius:50%;cursor:pointer;line-height:1}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#102a43;color:#fff;padding:10px 18px;border-radius:10px;z-index:40;font-weight:600}
+.toast.err{background:var(--danger)}
+@media(max-width:820px){
+ .shell{flex-direction:column}
+ .side{width:auto;flex-direction:row;overflow-x:auto;padding:8px}
+ .side .brand,.side .sp{display:none}
+ .side button.nav{white-space:nowrap}
+ main{padding:14px}.two{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div id="login" class="login">
+  <div class="card">
+    <h2 id="l-title"></h2>
+    <label class="f"><span data-t="api_url"></span><input id="api" class="input" dir="ltr"></label>
+    <label class="f"><span data-t="email"></span><input id="email" class="input" dir="ltr" autocomplete="username"></label>
+    <label class="f"><span data-t="password"></span><input id="pass" class="input" type="password" dir="ltr" autocomplete="current-password"></label>
+    <button id="loginBtn" class="btn" data-t="login"></button>
+    <button id="langL" class="btn ghost" style="margin-inline-start:8px"></button>
+    <p id="msg" class="muted"></p>
+  </div>
+</div>
+
+<div id="app" class="shell hidden">
+  <nav class="side" id="side"></nav>
+  <main id="main"></main>
+</div>
+
+<script>
+/* ============================== i18n ============================== */
+const L={
+en:{app:'Kurdistan Tourism Admin',nav_dashboard:'Dashboard',nav_locations:'Places',nav_accommodations:'Accommodation',nav_bookings:'Bookings',nav_users:'Users',nav_reviews:'Reviews',nav_ads:'Advertisements',nav_hero:'Home slider',nav_emergency:'Emergency',nav_notifications:'Notifications',nav_settings:'Settings & fees',nav_account:'My account',
+login:'Login',logout:'Logout',email:'Email',password:'Password',api_url:'API URL',login_failed:'Login failed',admin_only:'This account is not an admin',
+add:'Add',edit:'Edit',delete:'Delete',save:'Save',cancel:'Cancel',confirm_delete:'Delete this item? This cannot be undone.',saved:'Saved',deleted:'Deleted',upload:'Upload image',remove:'Remove',loading:'Loading…',no_data:'Nothing here yet',actions:'Actions',too_big:'Image is larger than 6 MB',add_url:'Add image link',
+f_name:'Name',f_name_ku:'Name (Kurdish)',f_name_ar:'Name (Arabic)',f_description:'Description',f_description_ku:'Description (Kurdish)',f_description_ar:'Description (Arabic)',f_category:'Category',f_type:'Type',f_city:'City',f_lat:'Latitude',f_lng:'Longitude',f_rating:'Rating',f_image:'Main image',f_images:'More images',f_video:'Video link',f_directions:'Directions / how to get there',f_verified:'Visible in the app',f_is_new:'Mark as new',f_is_featured:'Famous / featured',f_price:'Price per night',f_phone:'Phone',f_active:'Active (visible & bookable)',f_listing_until:'Listing paid until',
+f_title:'Title',f_company:'Company',f_link:'Link',f_starts_at:'Starts',f_ends_at:'Ends',f_sort_order:'Order',f_label:'Label',f_label_ku:'Label (Kurdish)',f_label_ar:'Label (Arabic)',f_body:'Message',f_created_at:'Created',
+f_email:'Email',f_password:'Password',f_role:'Role',f_banned:'Banned',f_bookings:'Bookings',f_date:'Check-in',f_nights:'Nights',f_guests:'Guests',f_total:'Total',f_fee:'Fee',f_status:'Status',f_payment_status:'Payment',f_user:'User',f_place:'Place',f_comment:'Comment',f_location:'Place',
+o_mountain:'Mountain',o_lake:'Lake',o_waterfall:'Waterfall',o_cave:'Cave',o_nature:'Nature',o_park:'Park',o_heritage:'Historical',o_cultural:'Cultural',o_other:'Other',o_hotel:'Hotel',o_house:'House',o_cabin:'Cabin',o_chalet:'Chalet',
+o_user:'User',o_admin:'Admin',o_pending:'Pending',o_confirmed:'Confirmed',o_cancelled:'Cancelled',o_completed:'Completed',o_unpaid:'Unpaid',o_paid:'Paid',o_refunded:'Refunded',
+s_users:'Users',s_locations:'Places',s_accommodations:'Accommodation',s_bookings:'Bookings',s_reviews:'Reviews',s_active_ads:'Active ads',s_income:'Total income',s_booking_fees:'Booking fees',s_listings:'Listing fees',s_ads:'Advertisements',recent_bookings:'Recent bookings',
+renew:'Renew listing (30 days)',renewed:'Listing renewed',new_user:'New user / admin',reset_pw:'Reset password',new_pw_prompt:'New password (at least 8 characters):',ban:'Ban',unban:'Unban',pw_changed:'Password changed',current_pw:'Current password',new_password:'New password (8+ characters)',change_pw:'Change password',
+hero_hint:'These images rotate on the app home screen. Lowest order shows first.',ad_hint:'Leave "Ends" empty for a 24-hour ad at the default price.',notif_hint:'Notifications are shown in the app’s Notifications page.',emergency_hint:'Numbers shown in the app’s Emergency section.',
+st_booking_fee:'Fee per booking',st_listing_fee:'Monthly listing fee',st_ad_price_24h:'Advertisement price (24h)',st_hero_interval_sec:'Home slider interval (seconds)',st_currency:'Currency',account_api:'Connected API'},
+ku:{app:'بەڕێوەبردنی گەشتیاری کوردستان',nav_dashboard:'داشبۆرد',nav_locations:'شوێنە گەشتیارییەکان',nav_accommodations:'شوێنی مانەوە',nav_bookings:'حجزەکان',nav_users:'بەکارهێنەران',nav_reviews:'هەڵسەنگاندنەکان',nav_ads:'بانگەشە',nav_hero:'وێنەکانی سەرەتا',nav_emergency:'فریاکەوتن',nav_notifications:'ئاگادارییەکان',nav_settings:'ڕێکخستن و کرێ',nav_account:'هەژماری من',
+login:'چوونەژوورەوە',logout:'چوونەدەرەوە',email:'ئیمەیڵ',password:'وشەی نهێنی',api_url:'ناونیشانی API',login_failed:'چوونەژوورەوە سەرنەکەوت',admin_only:'ئەم هەژمارە ئەدمین نییە',
+add:'زیادکردن',edit:'دەستکاری',delete:'سڕینەوە',save:'پاشەکەوتکردن',cancel:'پاشگەزبوونەوە',confirm_delete:'دڵنیایت لە سڕینەوە؟ ناگەڕێتەوە.',saved:'پاشەکەوت کرا',deleted:'سڕایەوە',upload:'بارکردنی وێنە',remove:'لابردن',loading:'چاوەڕێبە…',no_data:'هێشتا هیچ نییە',actions:'کردارەکان',too_big:'وێنەکە لە ٦ مێگابایت گەورەترە',add_url:'زیادکردنی بەستەری وێنە',
+f_name:'ناو',f_name_ku:'ناو (کوردی)',f_name_ar:'ناو (عەرەبی)',f_description:'زانیاری',f_description_ku:'زانیاری (کوردی)',f_description_ar:'زانیاری (عەرەبی)',f_category:'جۆر',f_type:'جۆر',f_city:'شار',f_lat:'Latitude',f_lng:'Longitude',f_rating:'هەڵسەنگاندن',f_image:'وێنەی سەرەکی',f_images:'وێنەی زیاتر',f_video:'بەستەری ڤیدیۆ',f_directions:'ڕێنمایی گەیشتن',f_verified:'لە ئەپەکەدا دەرکەوێت',f_is_new:'وەک نوێ نیشانبکە',f_is_featured:'بەناوبانگ',f_price:'نرخی هەر شەوێک',f_phone:'ژمارەی تەلەفۆن',f_active:'چالاک (دەردەکەوێت و حجزی دەکرێت)',f_listing_until:'لیستکردن دراوە تا',
+f_title:'ناونیشان',f_company:'کۆمپانیا',f_link:'بەستەر',f_starts_at:'دەستپێک',f_ends_at:'کۆتایی',f_sort_order:'ڕیزبەندی',f_label:'ناو',f_label_ku:'ناو (کوردی)',f_label_ar:'ناو (عەرەبی)',f_body:'دەق',f_created_at:'بەروار',
+f_email:'ئیمەیڵ',f_password:'وشەی نهێنی',f_role:'ڕۆڵ',f_banned:'قەدەغەکراو',f_bookings:'حجزەکان',f_date:'بەرواری هاتن',f_nights:'شەو',f_guests:'کەس',f_total:'کۆ',f_fee:'کرێ',f_status:'بارودۆخ',f_payment_status:'پارەدان',f_user:'بەکارهێنەر',f_place:'شوێن',f_comment:'کۆمێنت',f_location:'شوێن',
+o_mountain:'چیا',o_lake:'دەریاچە',o_waterfall:'ئاویشار',o_cave:'غار',o_nature:'سروشت',o_park:'پارک',o_heritage:'شوێنی مێژوویی',o_cultural:'شوێنی کلتووری',o_other:'هی تر',o_hotel:'هۆتێل',o_house:'خانوو',o_cabin:'کەپر',o_chalet:'شێڵتەر',
+o_user:'بەکارهێنەر',o_admin:'ئەدمین',o_pending:'چاوەڕوان',o_confirmed:'پشتڕاستکراوە',o_cancelled:'هەڵوەشێندراوەتەوە',o_completed:'تەواوبوو',o_unpaid:'نەدراوە',o_paid:'دراوە',o_refunded:'گەڕێندراوەتەوە',
+s_users:'بەکارهێنەران',s_locations:'شوێنەکان',s_accommodations:'شوێنی مانەوە',s_bookings:'حجزەکان',s_reviews:'هەڵسەنگاندنەکان',s_active_ads:'بانگەشەی چالاک',s_income:'کۆی داهات',s_booking_fees:'کرێی حجزەکان',s_listings:'کرێی لیستکردن',s_ads:'بانگەشەکان',recent_bookings:'دوایین حجزەکان',
+renew:'نوێکردنەوەی لیستکردن (٣٠ ڕۆژ)',renewed:'لیستکردن نوێکرایەوە',new_user:'بەکارهێنەر / ئەدمینی نوێ',reset_pw:'گۆڕینی وشەی نهێنی',new_pw_prompt:'وشەی نهێنی نوێ (لانی کەم ٨ پیت):',ban:'قەدەغەکردن',unban:'لابردنی قەدەغە',pw_changed:'وشەی نهێنی گۆڕدرا',current_pw:'وشەی نهێنی ئێستا',new_password:'وشەی نهێنی نوێ (٨+ پیت)',change_pw:'گۆڕینی وشەی نهێنی',
+hero_hint:'ئەم وێنانە لە شاشەی سەرەتای ئەپەکە دەگۆڕدرێن. ژمارەی کەمتر یەکەم دەردەکەوێت.',ad_hint:'ئەگەر «کۆتایی» بەتاڵ بێت، بانگەشەکە ٢٤ کاتژمێر دەبێت بە نرخی بنەڕەتی.',notif_hint:'ئاگادارییەکان لە بەشی ئاگادارییەکانی ئەپەکە پیشان دەدرێن.',emergency_hint:'ئەم ژمارانە لە بەشی فریاکەوتنی ئەپەکە پیشان دەدرێن.',
+st_booking_fee:'کرێی هەر حجزێک',st_listing_fee:'کرێی مانگانەی لیستکردن',st_ad_price_24h:'نرخی بانگەشە (٢٤ کاتژمێر)',st_hero_interval_sec:'ماوەی گۆڕینی وێنە (چرکە)',st_currency:'دراو',account_api:'API-ی پەیوەستکراو'}
+};
+let lang=localStorage.getItem('kt_lang')||'ku';
+const t=k=>(L[lang]&&L[lang][k])??L.en[k]??k;
+function applyLang(){document.documentElement.lang=lang==='ku'?'ckb':'en';document.documentElement.dir=lang==='ku'?'rtl':'ltr';document.title=t('app');
+  document.querySelectorAll('[data-t]').forEach(e=>e.textContent=t(e.dataset.t));$('#l-title').textContent='🏔️ '+t('app');$('#langL').textContent=lang==='ku'?'English':'کوردی'}
+
+/* ============================== helpers ============================== */
+const $=(s,r=document)=>r.querySelector(s);
+function h(tag,attrs,...kids){const e=document.createElement(tag);for(const[k,v]of Object.entries(attrs||{})){if(v===false||v==null)continue;if(k==='class')e.className=v;else if(k.startsWith('on'))e.addEventListener(k.slice(2),v);else if(k==='value')e.value=v;else e.setAttribute(k,v===true?'':v)}
+  for(const c of kids.flat(9)){if(c==null||c===false)continue;e.append(c.nodeType?c:document.createTextNode(String(c)))}return e}
+const safeUrl=u=>/^(https?:\/\/[^\s]+|\/uploads\/[\w.\-]+)$/.test(u||'')?u:'';
+const fmtNum=n=>new Intl.NumberFormat('en-US').format(Math.round(Number(n)||0));
+const fmtDate=s=>s?new Date(s).toLocaleString():'';
+const toLocalInput=s=>{if(!s)return'';const d=new Date(s),p=n=>String(n).padStart(2,'0');return`${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`};
+let toastT;function toast(msg,err){document.querySelector('.toast')?.remove();const e=h('div',{class:'toast'+(err?' err':'')},msg);document.body.append(e);clearTimeout(toastT);toastT=setTimeout(()=>e.remove(),3200)}
+
+let API=localStorage.getItem('kt_api')||(location.protocol.startsWith('http')&&location.pathname.startsWith('/admin')?location.origin+'/api':'http://localhost:8000/api');
+let TOKEN=localStorage.getItem('kt_token')||'';
+let CURRENCY='IQD';
+
+async function api(path,{method='GET',body}={}){
+  const r=await fetch(API+path,{method,headers:{'content-type':'application/json',Authorization:'Bearer '+TOKEN},body:body?JSON.stringify(body):undefined});
+  let j;try{j=await r.json()}catch{j={success:false,message:'Bad response ('+r.status+')'}}
+  if(r.status===401){logout(true);throw new Error(j.message||'Unauthorized')}
+  if(!j.success)throw new Error(j.message||'Error');return j.data}
+const run=async(fn)=>{try{return await fn()}catch(e){toast(e.message||String(e),true)}};
+
+async function uploadFile(file){
+  if(file.size>6*1024*1024)throw new Error(t('too_big'));
+  const data=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=()=>rej(new Error('Could not read file'));r.readAsDataURL(file)});
+  return (await api('/admin/upload',{method:'POST',body:{filename:file.name,data}})).url}
+
+/* ============================== resource config ============================== */
+const CATS=['mountain','lake','waterfall','cave','nature','park','heritage','cultural','other'],TYPES=['hotel','house','cabin','chalet'];
+const RES={
+ locations:{ep:'/admin/locations',
+  cols:[['image','img'],['name'],['category','enum'],['city'],['rating'],['verified','bool'],['is_new','bool']],
+  fields:[{k:'name',req:1},{k:'name_ku'},{k:'name_ar'},{k:'category',t:'select',opts:CATS,def:'other'},{k:'city'},{k:'lat',t:'num',req:1},{k:'lng',t:'num',req:1},
+   {k:'description',t:'area',full:1},{k:'description_ku',t:'area',full:1},{k:'description_ar',t:'area',full:1},{k:'image',t:'image',full:1},{k:'images',t:'images',full:1},{k:'video',t:'url',full:1},{k:'directions',t:'area',full:1},
+   {k:'rating',t:'num',step:'0.1'},{k:'verified',t:'bool',def:1},{k:'is_new',t:'bool'},{k:'is_featured',t:'bool'}]},
+ accommodations:{ep:'/admin/accommodations',
+  cols:[['image','img'],['name'],['type','enum'],['city'],['price','money'],['listing_until','date'],['active','bool']],
+  fields:[{k:'name',req:1},{k:'name_ku'},{k:'name_ar'},{k:'type',t:'select',opts:TYPES,def:'hotel'},{k:'city'},{k:'price',t:'num',req:1},{k:'phone'},
+   {k:'lat',t:'num'},{k:'lng',t:'num'},{k:'description',t:'area',full:1},{k:'description_ku',t:'area',full:1},{k:'description_ar',t:'area',full:1},{k:'image',t:'image',full:1},{k:'images',t:'images',full:1},
+   {k:'rating',t:'num',step:'0.1'},{k:'active',t:'bool',def:1}],
+  extra:(row,reload)=>[h('button',{class:'btn sm ghost',onclick:()=>run(async()=>{await api(`/admin/accommodations/${row.id}/renew-listing`,{method:'POST',body:{}});toast(t('renewed'));reload()})},t('renew'))]},
+ ads:{ep:'/admin/ads',hint:'ad_hint',
+  cols:[['image','img'],['title'],['company'],['price','money'],['starts_at','date'],['ends_at','date'],['active','bool']],
+  fields:[{k:'title',req:1},{k:'company'},{k:'link',t:'url',full:1},{k:'image',t:'image',full:1},{k:'price',t:'num'},{k:'starts_at',t:'datetime'},{k:'ends_at',t:'datetime'},{k:'active',t:'bool',def:1}]},
+ hero:{ep:'/admin/hero',hint:'hero_hint',
+  cols:[['image','img'],['sort_order'],['active','bool']],
+  fields:[{k:'image',t:'image',full:1,req:1},{k:'sort_order',t:'num',def:0},{k:'active',t:'bool',def:1}]},
+ emergency:{ep:'/admin/emergency',hint:'emergency_hint',
+  cols:[['label'],['label_ku'],['label_ar'],['phone'],['sort_order']],
+  fields:[{k:'label',req:1},{k:'label_ku'},{k:'label_ar'},{k:'phone',req:1},{k:'sort_order',t:'num',def:0}]},
+ notifications:{ep:'/admin/notifications',hint:'notif_hint',noEdit:1,
+  cols:[['title'],['body','text'],['created_at','date']],
+  fields:[{k:'title',req:1},{k:'body',t:'area',full:1}]},
+};
+
+/* ============================== table + form ============================== */
+function cell(col,row){
+  const[k,type]=col,v=row[k];
+  if(type==='img'){const u=safeUrl(v);return u?h('img',{class:'thumb',src:u,alt:'',loading:'lazy'}):h('div',{class:'thumb'})}
+  if(type==='bool')return h('span',{class:'pill '+(v?'ok':'no')},v?'✔':'✕');
+  if(type==='enum')return t('o_'+v);
+  if(type==='date')return fmtDate(v);
+  if(type==='money')return fmtNum(v);
+  if(type==='text')return h('div',{class:'cell-text',title:v||''},v||'');
+  return v==null?'':String(v)}
+
+function table(cols,rows,actionsFn,labelFn){
+  if(!rows.length)return h('div',{class:'card muted'},t('no_data'));
+  return h('div',{class:'tw'},h('table',null,
+    h('thead',null,h('tr',null,cols.map(c=>h('th',null,labelFn?labelFn(c):t('f_'+c[0]))),actionsFn&&h('th',null,t('actions')))),
+    h('tbody',null,rows.map(r=>h('tr',null,cols.map(c=>h('td',null,c.render?c.render(r):cell(c,r))),actionsFn&&h('td',null,h('div',{class:'acts'},actionsFn(r))))))))}
+
+function imageField(f,val){
+  const state={v:val||''};const prev=h('div',{class:'imgs'});const inp=h('input',{class:'input',dir:'ltr',placeholder:'https://…',value:state.v});
+  const file=h('input',{type:'file',accept:'image/jpeg,image/png,image/webp,image/gif',class:'hidden'});
+  const draw=()=>{prev.replaceChildren();const u=safeUrl(state.v);if(u)prev.append(h('div',{class:'im'},h('img',{src:u,alt:''})))};
+  inp.addEventListener('input',()=>{state.v=inp.value.trim();draw()});
+  file.addEventListener('change',()=>run(async()=>{if(!file.files[0])return;const u=await uploadFile(file.files[0]);state.v=u;inp.value=u;draw()}));
+  draw();
+  const el=h('div',null,prev,inp,h('div',{style:'margin-top:6px'},h('button',{type:'button',class:'btn sm ghost',onclick:()=>file.click()},t('upload')),file));
+  el.get=()=>state.v;return el}
+
+function imagesField(f,val){
+  const list=Array.isArray(val)?[...val]:[];const prev=h('div',{class:'imgs'});const inp=h('input',{class:'input',dir:'ltr',placeholder:'https://…'});
+  const file=h('input',{type:'file',accept:'image/jpeg,image/png,image/webp,image/gif',multiple:true,class:'hidden'});
+  const draw=()=>{prev.replaceChildren(...list.map((u,i)=>h('div',{class:'im'},h('img',{src:safeUrl(u),alt:''}),h('button',{type:'button',title:t('remove'),onclick:()=>{list.splice(i,1);draw()}},'×'))))};
+  file.addEventListener('change',()=>run(async()=>{for(const fl of file.files){list.push(await uploadFile(fl));draw()}file.value=''}));
+  draw();
+  const el=h('div',null,prev,h('div',{style:'display:flex;gap:6px'},inp,h('button',{type:'button',class:'btn sm ghost',onclick:()=>{const u=inp.value.trim();if(safeUrl(u)){list.push(u);inp.value='';draw()}}},t('add_url'))),
+    h('div',{style:'margin-top:6px'},h('button',{type:'button',class:'btn sm ghost',onclick:()=>file.click()},t('upload')),file));
+  el.get=()=>list;return el}
+
+function openForm({title,fields,values={},onSave}){
+  const ctl={};const body=h('div',{class:'two'});
+  for(const f of fields){
+    const v=values[f.k]??(f.def!==undefined?f.def:'');let input;
+    if(f.t==='bool'){input=h('input',{type:'checkbox'});input.checked=!!v;input.get=()=>input.checked;body.append(h('label',{class:'chk'},input,t('f_'+f.k)));ctl[f.k]=input;continue}
+    if(f.t==='select'){input=h('select',{class:'input'},f.opts.map(o=>h('option',{value:o},t('o_'+o))));input.value=v||f.opts[0];input.get=()=>input.value}
+    else if(f.t==='area'){input=h('textarea',{class:'input'});input.value=v;input.get=()=>input.value}
+    else if(f.t==='image'){input=imageField(f,v)}
+    else if(f.t==='images'){input=imagesField(f,v)}
+    else if(f.t==='datetime'){input=h('input',{class:'input',type:'datetime-local',dir:'ltr'});input.value=toLocalInput(v);input.get=()=>input.value?new Date(input.value).toISOString():''}
+    else if(f.t==='password'){input=h('input',{class:'input',type:'password',dir:'ltr',autocomplete:'new-password'});input.value=v;input.get=()=>input.value}
+    else if(f.t==='num'){input=h('input',{class:'input',type:'number',step:f.step||'any',dir:'ltr'});input.value=v;input.get=()=>input.value}
+    else{input=h('input',{class:'input',dir:f.t==='url'?'ltr':null,type:'text'});input.value=v;input.get=()=>input.value}
+    ctl[f.k]=input;
+    const lab=h('label',{class:'f',style:f.full||['area','image','images'].includes(f.t)?'grid-column:1/-1':null},t('f_'+f.k)+(f.req?' *':''),input);
+    body.append(lab)}
+  const save=h('button',{class:'btn'},t('save'));
+  const close=()=>ov.remove();
+  const ov=h('div',{class:'ov',onmousedown:e=>{if(e.target===ov)close()}},h('div',{class:'modal'},h('h3',null,title),body,h('div',{class:'row-end'},h('button',{class:'btn ghost',onclick:close},t('cancel')),save)));
+  save.addEventListener('click',()=>run(async()=>{save.disabled=true;try{const out={};for(const f of fields)out[f.k]=ctl[f.k].get();await onSave(out);close()}finally{save.disabled=false}}));
+  document.body.append(ov)}
+
+async function resourceView(name){
+  const cfg=RES[name],main=$('#main');
+  const load=async()=>{
+    const rows=await api(cfg.ep);
+    const actions=r=>[!cfg.noEdit&&h('button',{class:'btn sm ghost',onclick:()=>openForm({title:t('edit'),fields:cfg.fields,values:r,onSave:async v=>{await api(`${cfg.ep}/${r.id}`,{method:'PUT',body:v});toast(t('saved'));load()}})},t('edit')),
+      ...(cfg.extra?cfg.extra(r,load):[]),
+      h('button',{class:'btn sm danger',onclick:()=>{if(confirm(t('confirm_delete')))run(async()=>{await api(`${cfg.ep}/${r.id}`,{method:'DELETE'});toast(t('deleted'));load()})}},t('delete'))].filter(Boolean);
+    main.replaceChildren(head(t('nav_'+name),h('button',{class:'btn',onclick:()=>openForm({title:t('add'),fields:cfg.fields,onSave:async v=>{await api(cfg.ep,{method:'POST',body:v});toast(t('saved'));load()}})},'+ '+t('add'))),
+      cfg.hint&&h('p',{class:'hint'},t(cfg.hint)),table(cfg.cols,rows,actions))};
+  await load()}
+const head=(title,...right)=>h('div',{class:'head'},h('h1',null,title),h('div',null,right));
+
+/* ============================== special views ============================== */
+async function dashboardView(){
+  const s=await api('/admin/stats');CURRENCY=s.currency||'IQD';
+  const card=(label,val,sub)=>h('div',{class:'card'},h('div',{class:'muted'},label),h('div',{class:'num'},val),sub&&h('div',{class:'muted'},sub));
+  $('#main').replaceChildren(head(t('nav_dashboard')),
+    h('div',{class:'grid'},card(t('s_users'),s.users),card(t('s_locations'),s.locations),card(t('s_accommodations'),s.accommodations),card(t('s_bookings'),s.bookings),card(t('s_reviews'),s.reviews),card(t('s_active_ads'),s.active_ads)),
+    h('div',{class:'grid'},card(t('s_income'),fmtNum(s.income.total)+' '+CURRENCY),card(t('s_booking_fees'),fmtNum(s.income.booking_fees)+' '+CURRENCY),card(t('s_listings'),fmtNum(s.income.listings)+' '+CURRENCY),card(t('s_ads'),fmtNum(s.income.ads)+' '+CURRENCY)),
+    h('h2',null,t('recent_bookings')),
+    table([['user_name'],['accommodation_name'],['date'],['total'],['status'],['payment_status']].map(c=>Object.assign(c,{render:r=>{const v=r[c[0]];return c[0]==='status'||c[0]==='payment_status'?t('o_'+v):v==null?'':String(v)}})),s.recent_bookings,null,c=>t({user_name:'f_user',accommodation_name:'f_place'}[c[0]]||'f_'+c[0])))}
+
+async function bookingsView(){
+  const rows=await api('/admin/bookings');
+  const sel=(r,k,opts)=>{const s=h('select',{class:'input',style:'min-width:120px'},opts.map(o=>h('option',{value:o},t('o_'+o))));s.value=r[k];s.addEventListener('change',()=>run(async()=>{await api('/admin/bookings/'+r.id,{method:'PUT',body:{[k]:s.value}});toast(t('saved'))}));return s};
+  const cols=[
+   Object.assign(['date'],{render:r=>r.date}),Object.assign(['user'],{render:r=>h('div',null,r.user_name||'—',h('div',{class:'muted'},r.user_email||''))}),
+   Object.assign(['place'],{render:r=>r.accommodation_name||'—'}),Object.assign(['nights'],{render:r=>r.nights}),Object.assign(['guests'],{render:r=>r.guests}),
+   Object.assign(['total'],{render:r=>fmtNum(r.total)}),Object.assign(['fee'],{render:r=>fmtNum(r.fee)+' '+CURRENCY}),
+   Object.assign(['status'],{render:r=>sel(r,'status',['pending','confirmed','cancelled','completed'])}),Object.assign(['payment_status'],{render:r=>sel(r,'payment_status',['unpaid','paid','refunded'])})];
+  $('#main').replaceChildren(head(t('nav_bookings')),table(cols,rows))}
+
+async function usersView(){
+  const load=async()=>{
+    const rows=await api('/admin/users');
+    const roleSel=r=>{const s=h('select',{class:'input',style:'min-width:110px'},['user','admin'].map(o=>h('option',{value:o},t('o_'+o))));s.value=r.role;s.addEventListener('change',()=>run(async()=>{try{await api('/admin/users/'+r.id,{method:'PUT',body:{role:s.value}});toast(t('saved'))}catch(e){s.value=r.role;throw e}}));return s};
+    const cols=[Object.assign(['name'],{render:r=>r.name}),Object.assign(['email'],{render:r=>h('span',{dir:'ltr'},r.email)}),Object.assign(['role'],{render:roleSel}),
+      Object.assign(['bookings'],{render:r=>r.bookings}),Object.assign(['banned'],{render:r=>h('span',{class:'pill '+(r.banned?'no':'ok')},r.banned?'✕':'✔')}),Object.assign(['created_at'],{render:r=>fmtDate(r.created_at)})];
+    const actions=r=>[
+      h('button',{class:'btn sm ghost',onclick:()=>run(async()=>{await api('/admin/users/'+r.id,{method:'PUT',body:{banned:!r.banned}});toast(t('saved'));load()})},r.banned?t('unban'):t('ban')),
+      h('button',{class:'btn sm ghost',onclick:()=>{const p=prompt(t('new_pw_prompt'));if(p)run(async()=>{await api(`/admin/users/${r.id}/reset-password`,{method:'POST',body:{password:p}});toast(t('saved'))})}},t('reset_pw')),
+      h('button',{class:'btn sm danger',onclick:()=>{if(confirm(t('confirm_delete')))run(async()=>{await api('/admin/users/'+r.id,{method:'DELETE'});toast(t('deleted'));load()})}},t('delete'))];
+    const newFields=[{k:'name',req:1},{k:'email',req:1},{k:'password',t:'password',req:1},{k:'role',t:'select',opts:['user','admin'],def:'user'}];
+    $('#main').replaceChildren(head(t('nav_users'),h('button',{class:'btn',onclick:()=>openForm({title:t('new_user'),fields:newFields,onSave:async v=>{await api('/admin/users',{method:'POST',body:v});toast(t('saved'));load()}})},'+ '+t('add'))),table(cols,rows,actions))};
+  await load()}
+
+async function reviewsView(){
+  const load=async()=>{
+    const rows=await api('/admin/reviews');
+    const cols=[Object.assign(['location'],{render:r=>r.location_name||'—'}),Object.assign(['user'],{render:r=>r.user_name||'—'}),Object.assign(['rating'],{render:r=>'★'.repeat(r.rating)+'☆'.repeat(5-r.rating)}),
+      Object.assign(['comment'],{render:r=>h('div',{class:'cell-text',title:r.comment||''},r.comment||'')}),Object.assign(['created_at'],{render:r=>fmtDate(r.created_at)})];
+    $('#main').replaceChildren(head(t('nav_reviews')),table(cols,rows,r=>[h('button',{class:'btn sm danger',onclick:()=>{if(confirm(t('confirm_delete')))run(async()=>{await api('/admin/reviews/'+r.id,{method:'DELETE'});toast(t('deleted'));load()})}},t('delete'))]))};
+  await load()}
+
+async function settingsView(){
+  const s=await api('/admin/settings');CURRENCY=s.currency||CURRENCY;
+  const keys=['booking_fee','listing_fee','ad_price_24h','hero_interval_sec','currency'],inputs={};
+  const form=h('div',{class:'card',style:'max-width:520px'},keys.map(k=>{const i=h('input',{class:'input',dir:'ltr',type:k==='currency'?'text':'number',min:0});i.value=s[k];inputs[k]=i;return h('label',{class:'f'},t('st_'+k),i)}),
+    h('button',{class:'btn',onclick:()=>run(async()=>{const b={};keys.forEach(k=>b[k]=inputs[k].value);const r=await api('/admin/settings',{method:'PUT',body:b});CURRENCY=r.currency;toast(t('saved'))})},t('save')));
+  $('#main').replaceChildren(head(t('nav_settings')),form)}
+
+async function accountView(){
+  const cur=h('input',{class:'input',type:'password',dir:'ltr',autocomplete:'current-password'}),nw=h('input',{class:'input',type:'password',dir:'ltr',autocomplete:'new-password'});
+  $('#main').replaceChildren(head(t('nav_account')),h('div',{class:'card',style:'max-width:520px'},
+    h('label',{class:'f'},t('current_pw'),cur),h('label',{class:'f'},t('new_password'),nw),
+    h('button',{class:'btn',onclick:()=>run(async()=>{await api('/admin/change-password',{method:'POST',body:{current:cur.value,password:nw.value}});cur.value=nw.value='';toast(t('pw_changed'))})},t('change_pw')),
+    h('p',{class:'muted',dir:'ltr'},t('account_api')+': '+API)))}
+
+const VIEWS={dashboard:dashboardView,locations:()=>resourceView('locations'),accommodations:()=>resourceView('accommodations'),bookings:bookingsView,users:usersView,reviews:reviewsView,ads:()=>resourceView('ads'),hero:()=>resourceView('hero'),emergency:()=>resourceView('emergency'),notifications:()=>resourceView('notifications'),settings:settingsView,account:accountView};
+let current='dashboard';
+function nav(){
+  const side=$('#side');side.replaceChildren(h('div',{class:'brand'},'🏔️ '+t('app')),
+    ...Object.keys(VIEWS).map(k=>h('button',{class:'nav'+(k===current?' on':''),onclick:()=>{current=k;nav();show()}},t('nav_'+k))),
+    h('div',{class:'sp'}),h('button',{class:'nav',onclick:()=>{lang=lang==='ku'?'en':'ku';localStorage.setItem('kt_lang',lang);applyLang();nav();show()}},lang==='ku'?'English':'کوردی'),
+    h('button',{class:'nav',onclick:()=>logout()},t('logout')))}
+const show=()=>{$('#main').replaceChildren(h('p',{class:'muted'},t('loading')));return run(VIEWS[current])};
+
+/* ============================== auth ============================== */
+function logout(silent){TOKEN='';localStorage.removeItem('kt_token');$('#app').classList.add('hidden');$('#login').classList.remove('hidden');if(silent)$('#msg').textContent=''}
+async function enter(){$('#login').classList.add('hidden');$('#app').classList.remove('hidden');applyLang();nav();try{const s=await api('/admin/stats');CURRENCY=s.currency||'IQD'}catch{return}show()}
+$('#loginBtn').addEventListener('click',async()=>{
+  const msg=$('#msg');msg.textContent='';API=($('#api').value||API).trim().replace(/\/$/,'');
+  try{
+    const r=await fetch(API+'/auth/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email:$('#email').value.trim(),password:$('#pass').value})});
+    const j=await r.json();
+    if(!j.success){msg.textContent=j.message||t('login_failed');return}
+    if(j.data.user.role!=='admin'){msg.textContent=t('admin_only');return}
+    TOKEN=j.data.token;localStorage.setItem('kt_token',TOKEN);localStorage.setItem('kt_api',API);$('#pass').value='';enter()
+  }catch(e){msg.textContent=t('login_failed')+' ('+e.message+')'}});
+$('#pass').addEventListener('keydown',e=>{if(e.key==='Enter')$('#loginBtn').click()});
+$('#langL').addEventListener('click',()=>{lang=lang==='ku'?'en':'ku';localStorage.setItem('kt_lang',lang);applyLang()});
+$('#api').value=API;applyLang();
+if(TOKEN)enter();
+</script>
+</body>
+</html>

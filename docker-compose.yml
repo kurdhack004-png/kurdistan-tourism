@@ -4,6 +4,7 @@ services:
     working_dir: /app
     volumes:
       - ./backend-node:/app
+      - ./admin-dashboard:/admin-dashboard:ro
     ports:
       - "8000:8000"
     command: sh -c "npm install && npm start"

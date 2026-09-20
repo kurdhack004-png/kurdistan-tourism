@@ -32,9 +32,29 @@ flutter analyze
 flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000/api
 ```
 
-## Admin
+## Admin dashboard
 
-Open `admin-dashboard/index.html` after starting the API. The dashboard stores its token in browser local storage.
+Start the API, then open **http://localhost:8000/admin** (the API serves the dashboard itself, so there are no CORS problems).
+Log in with `ADMIN_EMAIL` / `ADMIN_PASSWORD` from `backend-node/.env`, then change the password under *My account*.
+
+From the dashboard you can manage everything without touching the database:
+
+| Section | What you can do |
+|---|---|
+| Dashboard | Users, places, bookings, reviews, active ads, income (booking fees + listing fees + ads) |
+| Places | Add / edit / delete mountains, lakes, waterfalls, caves, nature, parks, historical and cultural places (Kurdish / Arabic / English text, GPS, main image + gallery upload, video link, directions, new / featured flags) |
+| Accommodation | Hotels, houses, cabins, chalets: price, GPS, images, active on/off, monthly listing fee renewal |
+| Bookings | See all bookings, change booking status and payment status (incl. refunds) |
+| Users | Create users or **new admins**, change role, ban / unban, reset password, delete |
+| Reviews | Moderate (delete) reviews; place ratings are recalculated automatically |
+| Advertisements | Create ads for companies (24h by default at the configured price) |
+| Home slider | Images that rotate on the app home screen, order and on/off |
+| Emergency | Police, ambulance, fire, tourism contact numbers |
+| Notifications | Publish notifications shown in the app |
+| Settings & fees | Booking fee, monthly listing fee, ad price, slider interval, currency |
+
+The dashboard is available in Kurdish (RTL) and English. See `docs/ADMIN.md` for the API endpoints the mobile app can use
+(`/api/hero`, `/api/ads`, `/api/emergency`, `/api/notifications`, `/api/settings/public`).
 
 ## Production notes
 
