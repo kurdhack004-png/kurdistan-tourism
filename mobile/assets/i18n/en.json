@@ -104,5 +104,8 @@
   "data_load_failed": "Could not load place data.",
   "offline_pending_payment": "The booking was saved as pending; payment is not confirmed yet.",
   "explore": "Explore",
-  "hotels": "Hotels & stays"
+  "hotels": "Hotels & stays",
+  "booking_fee": "Booking fee",
+  "service_fee": "Service fee",
+  "pending_payment": "Payment is still pending."
 }
