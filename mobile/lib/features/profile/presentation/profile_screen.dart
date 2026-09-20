@@ -5,6 +5,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../auth/presentation/login_screen.dart';
+import '../../auth/presentation/register_screen.dart';
 import '../../bookings/presentation/booking_history_screen.dart';
 import '../../emergency/presentation/emergency_screen.dart';
 import '../../notifications/presentation/notifications_screen.dart';
@@ -63,19 +64,32 @@ class ProfileScreen extends ConsumerWidget {
               MaterialPageRoute(builder: (_) => const SettingsScreen())),
           ),
           const SizedBox(height: AppSpacing.lg),
-          _ProfileTile(
-            icon: Icons.logout_rounded,
-            label: 'logout'.tr(),
-            danger: true,
-            onTap: () async {
-              await ref.read(authProvider.notifier).logout();
-              if (!context.mounted) return;
-              Navigator.of(context).pushAndRemoveUntil(
+          if (!ref.watch(authProvider).isAuthenticated) ...[
+            _ProfileTile(
+              icon: Icons.login_rounded,
+              label: 'login'.tr(),
+              onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const LoginScreen()),
-                (_) => false,
-              );
-            },
-          ),
+              ),
+            ),
+            _ProfileTile(
+              icon: Icons.person_add_alt_1_rounded,
+              label: 'register'.tr(),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const RegisterScreen()),
+              ),
+            ),
+          ] else
+            _ProfileTile(
+              icon: Icons.logout_rounded,
+              label: 'logout'.tr(),
+              danger: true,
+              onTap: () async {
+                await ref.read(authProvider.notifier).logout();
+                if (!context.mounted) return;
+                setState(() {});
+              },
+            ),
         ],
       ),
     );
