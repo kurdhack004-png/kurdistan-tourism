@@ -30,6 +30,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     // Authentication is requested only when the user starts a protected flow
     // such as accommodation booking/payment.
     final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
     final hasSelectedLanguage = prefs.containsKey('settings_language');
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
@@ -48,11 +49,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.terrain_rounded, size: 56, color: AppColors.saffron),
-            SizedBox(height: 16),
+            const Icon(Icons.terrain_rounded, size: 56, color: AppColors.saffron),
+            const SizedBox(height: 16),
             Text(
               'app_name'.tr(),
-              style: TextStyle(
+              style: const TextStyle(
                 color: AppColors.limestoneWhite,
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
