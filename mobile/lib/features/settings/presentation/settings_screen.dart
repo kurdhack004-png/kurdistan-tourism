@@ -23,19 +23,19 @@ class SettingsScreen extends ConsumerWidget {
               SwitchListTile(
                 value: settings.darkMode,
                 onChanged: notifier.setDarkMode,
-                title: const Text('dark_mode'.tr()),
+                title: Text('dark_mode'.tr()),
                 secondary: const Icon(Icons.dark_mode_outlined),
               ),
               SwitchListTile(
                 value: settings.notificationsEnabled,
                 onChanged: notifier.setNotifications,
-                title: const Text('notifications'.tr()),
+                title: Text('notifications'.tr()),
                 secondary: const Icon(Icons.notifications_outlined),
               ),
               SwitchListTile(
                 value: settings.locationEnabled,
                 onChanged: notifier.setLocation,
-                title: const Text('location_gps'.tr()),
+                title: Text('location_gps'.tr()),
                 secondary: const Icon(Icons.location_on_outlined),
               ),
             ],
@@ -45,7 +45,7 @@ class SettingsScreen extends ConsumerWidget {
             children: [
               ListTile(
                 leading: const Icon(Icons.language_outlined),
-                title: const Text('language'.tr()),
+                title: Text('language'.tr()),
                 trailing: DropdownButton<String>(
                   value: settings.language,
                   underline: const SizedBox.shrink(),
