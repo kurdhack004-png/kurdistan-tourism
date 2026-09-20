@@ -47,5 +47,20 @@
   "auth_login_failed": "Login failed. If the backend is not running, register a new account first.",
   "register_account": "Create account",
   "no_account_register": "Don't have an account? Create one",
-  "app_slogan": "Explore Kurdistan"
+  "app_slogan": "Explore Kurdistan",
+  "all": "All",
+  "mountains": "Mountains",
+  "lakes": "Lakes",
+  "caves": "Caves",
+  "waterfalls": "Waterfalls",
+  "hero_mountains": "Kurdistan mountains",
+  "hero_lakes": "Natural lakes",
+  "hero_waterfalls": "Beautiful waterfalls",
+  "hero_caves": "Historic caves",
+  "hero_history": "Cultural places",
+  "region_title": "Erbil region",
+  "locations_available": "{count} tourist places available",
+  "loading_places": "Loading places...",
+  "ad": "Ad",
+  "search_hint": "Search places or mountains..."
 }
