@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../auth/presentation/login_screen.dart';
+import '../../auth/providers/auth_provider.dart';
 import 'payment_screen.dart';
 
 class BookingScreen extends ConsumerStatefulWidget {
@@ -49,6 +51,28 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
         _checkOut = picked;
       }
     });
+  }
+
+  Future<void> _continueToPayment() async {
+    if (!ref.read(authProvider).isAuthenticated) {
+      await Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      );
+      if (!mounted || !ref.read(authProvider).isAuthenticated) return;
+    }
+    if (!mounted) return;
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => PaymentScreen(
+          accommodationId: widget.accommodationId,
+          accommodationName: widget.accommodationName,
+          checkIn: _checkIn,
+          checkOut: _checkOut,
+          guests: _guests,
+          total: _total,
+        ),
+      ),
+    );
   }
 
   @override
@@ -148,18 +172,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
           ),
           const SizedBox(height: AppSpacing.xl),
           FilledButton(
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => PaymentScreen(
-                  accommodationId: widget.accommodationId,
-                  accommodationName: widget.accommodationName,
-                  checkIn: _checkIn,
-                  checkOut: _checkOut,
-                  guests: _guests,
-                  total: _total,
-                ),
-              ),
-            ),
+            onPressed: _continueToPayment,
             child: Text('continue_payment'.tr()),
           ),
         ],
