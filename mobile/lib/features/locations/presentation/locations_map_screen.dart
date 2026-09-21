@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -34,6 +35,7 @@ class _LocationsMapScreenState extends ConsumerState<LocationsMapScreen> {
   bool _mapFailed = false;
   bool _locating = false;
   Position? _currentPosition;
+  StreamSubscription<Position>? _positionSubscription;
 
   @override
   void initState() {
@@ -73,6 +75,18 @@ class _LocationsMapScreenState extends ConsumerState<LocationsMapScreen> {
         _center = LatLng(pos.latitude, pos.longitude);
       }
     });
+    if (pos != null) {
+      _positionSubscription?.cancel();
+      _positionSubscription = Geolocator.getPositionStream(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          distanceFilter: 25,
+        ),
+      ).listen((next) {
+        if (!mounted) return;
+        setState(() => _currentPosition = next);
+      });
+    }
     if (pos != null && _mapController != null) {
       await _mapController!.animateCamera(
         CameraUpdate.newLatLngZoom(
@@ -234,7 +248,7 @@ class _LocationsMapScreenState extends ConsumerState<LocationsMapScreen> {
         final id = symbol.data?['id'] as String?;
         for (final location in _locations) {
           if (location.id == id) {
-            _openLocation(location);
+            _showLocationSheet(location);
             break;
           }
         }
@@ -254,6 +268,77 @@ class _LocationsMapScreenState extends ConsumerState<LocationsMapScreen> {
           location.longitude,
         ) /
         1000;
+  }
+
+  void _showLocationSheet(TouristLocation location) {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) {
+        final distance = _currentPosition == null
+            ? null
+            : Geolocator.distanceBetween(
+                  _currentPosition!.latitude,
+                  _currentPosition!.longitude,
+                  location.latitude,
+                  location.longitude,
+                ) /
+                1000;
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  location.localizedName(context.locale.languageCode),
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  distance == null
+                      ? location.category
+                      : '${distance.toStringAsFixed(1)} km • ${location.category}',
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          Navigator.pop(sheetContext);
+                          _openDirections(location);
+                        },
+                        icon: const Icon(Icons.directions_rounded),
+                        label: Text('directions'.tr()),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: FilledButton.icon(
+                        onPressed: () {
+                          Navigator.pop(sheetContext);
+                          _openLocation(location);
+                        },
+                        icon: const Icon(Icons.info_outline_rounded),
+                        label: Text('details'.tr()),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _positionSubscription?.cancel();
+    super.dispose();
   }
 
   void _openLocation(TouristLocation location) {

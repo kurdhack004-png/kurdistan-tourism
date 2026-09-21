@@ -176,5 +176,10 @@
   "title_ckb": "العنوان بالكردية",
   "title_ar": "العنوان بالعربية",
   "title_en": "العنوان بالإنجليزية",
-  "cancel": "إلغاء"
+  "cancel": "إلغاء",
+  "verified_place": "موقع موثّق",
+  "distance_not_loaded": "لم يتم تحديد المسافة بعد",
+  "distance_from_me": "من موقعي",
+  "load_distance": "تحديد المسافة",
+  "location_unavailable": "الموقع عبر GPS غير متاح"
 }
