@@ -204,7 +204,29 @@ class _LocationsMapScreenState extends ConsumerState<LocationsMapScreen> {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) => Center(child: Text('data_load_failed'.tr())),
+        error: (_, __) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.cloud_off_rounded, size: 44),
+                const SizedBox(height: 12),
+                Text('data_load_failed'.tr(), textAlign: TextAlign.center),
+                const SizedBox(height: 12),
+                FilledButton.icon(
+                  onPressed: () => ref.invalidate(
+                    nearbyLocationsProvider(
+                      NearbyParams(_center.latitude, _center.longitude),
+                    ),
+                  ),
+                  icon: const Icon(Icons.refresh_rounded),
+                  label: Text('retry'.tr()),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -1,6 +1,5 @@
 import '../../core/network/api_client.dart';
 import '../../features/locations/models/tourist_location.dart';
-import '../local/demo_data.dart';
 import '../local/location_cache.dart';
 
 class LocationRepository {
@@ -12,8 +11,7 @@ class LocationRepository {
   Future<List<TouristLocation>> nearby({
     required double lat,
     required double lng,
-    // 1000 km: covers the whole Kurdistan Region, so every place added in the
-    // admin shows up (results are still sorted by distance from lat/lng).
+    // Covers the Kurdistan Region while keeping the query bounded.
     double radiusMeters = 1000000,
   }) async {
     try {
@@ -24,16 +22,23 @@ class LocationRepository {
       });
       final raw = res.data is Map ? res.data['data'] : null;
       final list = raw is Map ? raw['data'] : raw;
-      if (list is! List) throw const FormatException('Invalid locations response');
+      if (list is! List) {
+        throw const FormatException('Invalid locations response');
+      }
+
       final items = list
           .whereType<Map>()
           .map((e) => TouristLocation.fromJson(Map<String, dynamic>.from(e)))
           .toList();
+
       await _cache.save(items);
       return items;
     } catch (_) {
+      // Offline mode may use the last verified API response, but never
+      // silently replaces production data with hard-coded demo places.
       final cached = await _cache.load();
-      return cached.isNotEmpty ? cached : demoLocations;
+      if (cached.isNotEmpty) return cached;
+      rethrow;
     }
   }
 }
