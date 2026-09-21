@@ -1,24 +1,84 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/mountain_ridge_divider.dart';
 import '../../accommodations/presentation/nearby_stays_screen.dart';
-import '../../reviews/presentation/reviews_screen.dart';
 import '../../trip/providers/trip_provider.dart';
 import '../../../data/local/favorites_provider.dart';
 import '../models/tourist_location.dart';
-import 'widgets/rating_badge.dart';
 import 'locations_map_screen.dart';
 
-class LocationDetailScreen extends ConsumerWidget {
+class LocationDetailScreen extends ConsumerStatefulWidget {
   const LocationDetailScreen({super.key, required this.location});
-
   final TouristLocation location;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<LocationDetailScreen> createState() => _LocationDetailScreenState();
+}
+
+class _LocationDetailScreenState extends ConsumerState<LocationDetailScreen> {
+  Position? _position;
+  bool _locating = false;
+
+  TouristLocation get location => widget.location;
+
+  Future<void> _loadDistance() async {
+    if (_locating || _position != null) return;
+    setState(() => _locating = true);
+    try {
+      var permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        return;
+      }
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
+      );
+      if (mounted) setState(() => _position = position);
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('location_unavailable'.tr())),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _locating = false);
+    }
+  }
+
+  double? get _distanceKm {
+    final p = _position;
+    if (p == null) return null;
+    return Geolocator.distanceBetween(
+          p.latitude,
+          p.longitude,
+          location.latitude,
+          location.longitude,
+        ) /
+        1000;
+  }
+
+  Future<void> _openDirections() async {
+    final uri = Uri.parse(
+      'https://www.google.com/maps/dir/?api=1&destination='
+      '\${location.latitude},\${location.longitude}',
+    );
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication) && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('map_open_failed'.tr())),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final languageCode = context.locale.languageCode;
     final inTrip = ref.watch(tripProvider).contains(location.id);
     final isFavorite = ref.watch(favoritesProvider).contains(location.id);
@@ -30,7 +90,7 @@ class LocationDetailScreen extends ConsumerWidget {
             expandedHeight: 260,
             actions: [
               IconButton(
-                tooltip: 'دڵخواز',
+                tooltip: 'favorites'.tr(),
                 onPressed: () => ref.read(favoritesProvider.notifier).toggle(location.id),
                 icon: Icon(
                   isFavorite ? Icons.favorite : Icons.favorite_border,
@@ -64,50 +124,83 @@ class LocationDetailScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  Text(
+                    location.localizedName(languageCode),
+                    style: Theme.of(context).textTheme.displayLarge,
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
                     children: [
-                      Expanded(
-                        child: Text(
-                          location.localizedName(languageCode),
-                          style: Theme.of(context).textTheme.displayLarge,
+                      _InfoChip(icon: Icons.category_outlined, label: location.category),
+                      if (location.elevationMeters != null)
+                        _InfoChip(
+                          icon: Icons.terrain_rounded,
+                          label: '\${location.elevationMeters} m',
                         ),
-                      ),
-                      GestureDetector(
-                        onTap: () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => ReviewsScreen(
-                              reviewableType: 'location',
-                              reviewableId: location.id,
-                              title: location.nameCkb,
-                            ),
-                          ),
-                        ),
-                        child: const RatingBadge(rating: 4.8),
+                      _InfoChip(
+                        icon: Icons.verified_outlined,
+                        label: 'verified_place'.tr(),
                       ),
                     ],
                   ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.terrain_rounded,
-                        size: 15,
-                        color: AppColors.riverstone,
+                  const SizedBox(height: AppSpacing.md),
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(Icons.place_outlined, size: 20),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  '\${location.latitude.toStringAsFixed(5)}, '
+                                  '\${location.longitude.toStringAsFixed(5)}',
+                                ),
+                              ),
+                              IconButton(
+                                tooltip: 'directions'.tr(),
+                                onPressed: _openDirections,
+                                icon: const Icon(Icons.directions_rounded),
+                              ),
+                            ],
+                          ),
+                          const Divider(height: 16),
+                          Row(
+                            children: [
+                              const Icon(Icons.near_me_outlined, size: 20),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  _distanceKm == null
+                                      ? 'distance_not_loaded'.tr()
+                                      : '\${_distanceKm!.toStringAsFixed(1)} km • \${'distance_from_me'.tr()}',
+                                ),
+                              ),
+                              if (_distanceKm == null)
+                                TextButton(
+                                  onPressed: _locating ? null : _loadDistance,
+                                  child: _locating
+                                      ? const SizedBox(
+                                          width: 16,
+                                          height: 16,
+                                          child: CircularProgressIndicator(strokeWidth: 2),
+                                        )
+                                      : Text('load_distance'.tr()),
+                                ),
+                            ],
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 4),
-                      Text(
-                        location.elevationMeters != null
-                            ? '${location.elevationMeters} م بەرزی'
-                            : location.category,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                    ],
+                    ),
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   const Divider(),
                   const SizedBox(height: AppSpacing.md),
-                  Text('دەربارە', style: Theme.of(context).textTheme.titleMedium),
+                  Text('about'.tr(), style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: AppSpacing.sm),
                   Text(
                     location.localizedDescription(languageCode) ?? 'details'.tr(),
@@ -125,25 +218,15 @@ class LocationDetailScreen extends ConsumerWidget {
                                 : Icons.playlist_add_rounded,
                             size: 18,
                           ),
-                          label: Text(
-                            inTrip
-                                ? 'لە پلانی گەشتدایە'
-                                : 'زیادکردن بۆ پلانی گەشتم',
-                          ),
+                          label: Text(inTrip ? 'on_trip'.tr() : 'add_to_trip'.tr()),
                         ),
                       ),
                       const SizedBox(width: AppSpacing.sm),
                       Expanded(
                         child: OutlinedButton.icon(
-                          onPressed: () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => LocationsMapScreen(
-                                focusLocation: location,
-                              ),
-                            ),
-                          ),
-                          icon: const Icon(Icons.map_outlined, size: 18),
-                          label: const Text('لەسەر نەخشە'),
+                          onPressed: _openDirections,
+                          icon: const Icon(Icons.directions_rounded, size: 18),
+                          label: Text('directions'.tr()),
                         ),
                       ),
                     ],
@@ -154,6 +237,19 @@ class LocationDetailScreen extends ConsumerWidget {
                     child: FilledButton.icon(
                       onPressed: () => Navigator.of(context).push(
                         MaterialPageRoute(
+                          builder: (_) => LocationsMapScreen(focusLocation: location),
+                        ),
+                      ),
+                      icon: const Icon(Icons.map_outlined, size: 18),
+                      label: Text('view_on_map'.tr()),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute(
                           builder: (_) => NearbyStaysScreen(
                             lat: location.latitude,
                             lng: location.longitude,
@@ -161,7 +257,7 @@ class LocationDetailScreen extends ConsumerWidget {
                         ),
                       ),
                       icon: const Icon(Icons.hotel_outlined, size: 18),
-                      label: const Text('بینینی شوێنی مانەوەی نزیک'),
+                      label: Text('nearby_stays'.tr()),
                     ),
                   ),
                 ],
@@ -172,4 +268,16 @@ class LocationDetailScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+class _InfoChip extends StatelessWidget {
+  const _InfoChip({required this.icon, required this.label});
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Chip(
+        avatar: Icon(icon, size: 17),
+        label: Text(label),
+      );
 }
