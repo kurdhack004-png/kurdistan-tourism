@@ -1,6 +1,5 @@
 import '../../core/network/api_client.dart';
 import '../../features/locations/models/tourist_location.dart';
-import '../local/demo_data.dart';
 import '../local/location_cache.dart';
 
 class LocationRepository {
@@ -12,9 +11,7 @@ class LocationRepository {
   Future<List<TouristLocation>> nearby({
     required double lat,
     required double lng,
-    // 1000 km: covers the whole Kurdistan Region, so every place added in the
-    // admin shows up (results are still sorted by distance from lat/lng).
-    double radiusMeters = 1000000,
+    double radiusMeters = 350000,
   }) async {
     try {
       final res = await _api.client.get('/locations', queryParameters: {
@@ -33,7 +30,8 @@ class LocationRepository {
       return items;
     } catch (_) {
       final cached = await _cache.load();
-      return cached.isNotEmpty ? cached : demoLocations;
+      if (cached.isNotEmpty) return cached;
+      rethrow;
     }
   }
 }
