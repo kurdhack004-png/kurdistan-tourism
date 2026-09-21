@@ -176,5 +176,10 @@
   "title_ckb": "Kurdish title",
   "title_ar": "Arabic title",
   "title_en": "English title",
-  "cancel": "Cancel"
+  "cancel": "Cancel",
+  "verified_place": "Verified place",
+  "distance_not_loaded": "Distance not loaded yet",
+  "distance_from_me": "from me",
+  "load_distance": "Get distance",
+  "location_unavailable": "GPS location is unavailable"
 }
