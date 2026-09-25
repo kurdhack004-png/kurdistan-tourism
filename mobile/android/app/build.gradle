@@ -44,7 +44,8 @@ dependencies {
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
 }
 
-tasks.named("assembleRelease") {
+
+tasks.matching { it.name == "assembleRelease" }.configureEach {
     doLast {
         def apk = file("$buildDir/outputs/apk/release/app-release.apk")
         def flutterOutput = file("${rootProject.projectDir}/../build/app/outputs/flutter-apk")
