@@ -3,18 +3,16 @@ name: Build Kurdistan Tourism Android
 on:
   workflow_dispatch:
   push:
-    branches:
-      - main
-      - master
+    branches: [ main, master ]
 
 permissions:
   contents: read
 
 jobs:
   build-android:
-    name: Flutter Android Release APK and AAB
+    name: Flutter Android Release APK
     runs-on: ubuntu-24.04
-    timeout-minutes: 40
+    timeout-minutes: 30
 
     defaults:
       run:
@@ -28,22 +26,18 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "21"
+          java-version: '21'
           cache: gradle
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
+          flutter-version: '3.47.4'
           channel: stable
           cache: true
 
-      - name: Show tool versions
-        run: |
-          flutter --version
-          java -version
-
-      - name: Clean Flutter build
-        run: flutter clean
+      - name: Flutter doctor
+        run: flutter doctor -v
 
       - name: Get dependencies
         run: flutter pub get
@@ -51,71 +45,13 @@ jobs:
       - name: Analyze
         run: flutter analyze
 
-      - name: Build APK with Gradle
-        working-directory: mobile/android
-        env:
-          GRADLE_OPTS: >-
-            -Dorg.gradle.daemon=false
-            -Dorg.gradle.vfs.watch=false
-        run: |
-          chmod +x gradlew
-          ./gradlew --stop || true
-          ./gradlew :app:assembleRelease --no-daemon --no-watch-fs --stacktrace
-
-      - name: Collect APK
-        working-directory: mobile
-        run: |
-          mkdir -p build/app/outputs/flutter-apk
-          APK="$(find android/app/build/outputs/apk -type f -name '*.apk' | head -n 1)"
-
-          if [ -z "$APK" ]; then
-            echo "APK was not generated"
-            find android/app/build -type f | sort || true
-            exit 1
-          fi
-
-          echo "APK found at: $APK"
-          cp "$APK" build/app/outputs/flutter-apk/app-release.apk
-          ls -lh build/app/outputs/flutter-apk/app-release.apk
-
-      - name: Build AAB with Gradle
-        working-directory: mobile/android
-        env:
-          GRADLE_OPTS: >-
-            -Dorg.gradle.daemon=false
-            -Dorg.gradle.vfs.watch=false
-        run: |
-          chmod +x gradlew
-          ./gradlew :app:bundleRelease --no-daemon --no-watch-fs --stacktrace
-
-      - name: Collect AAB
-        working-directory: mobile
-        run: |
-          mkdir -p build/app/outputs/bundle/release
-          AAB="$(find android/app/build/outputs/bundle -type f -name '*.aab' | head -n 1)"
-
-          if [ -z "$AAB" ]; then
-            echo "AAB was not generated"
-            find android/app/build -type f | sort || true
-            exit 1
-          fi
-
-          echo "AAB found at: $AAB"
-          cp "$AAB" build/app/outputs/bundle/release/app-release.aab
-          ls -lh build/app/outputs/bundle/release/app-release.aab
+      - name: Build release APK
+        run: flutter build apk --release
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: kurdistan-tourism-apk
           path: mobile/build/app/outputs/flutter-apk/app-release.apk
-          if-no-files-found: error
-          retention-days: 14
-
-      - name: Upload AAB
-        uses: actions/upload-artifact@v4
-        with:
-          name: kurdistan-tourism-aab
-          path: mobile/build/app/outputs/bundle/release/app-release.aab
           if-no-files-found: error
           retention-days: 14
