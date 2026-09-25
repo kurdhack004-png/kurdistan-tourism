@@ -10,7 +10,7 @@ class ApiClient {
       : _dio = Dio(BaseOptions(
           baseUrl: baseUrl ?? const String.fromEnvironment(
             'API_BASE_URL',
-            defaultValue: 'http://10.0.2.2:8000/api',
+            defaultValue: 'https://rapids-supporting-settled-system.trycloudflare.com/api',
           ),
           connectTimeout: const Duration(seconds: 3),
           receiveTimeout: const Duration(seconds: 10),
