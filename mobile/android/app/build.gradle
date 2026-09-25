@@ -43,3 +43,22 @@ dependencies {
     // above (geolocator_android needs this on minSdk < 26).
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
 }
+
+tasks.named("assembleRelease") {
+    doLast {
+        def apk = file("$buildDir/outputs/apk/release/app-release.apk")
+        def flutterOutput = file("${rootProject.projectDir}/../build/app/outputs/flutter-apk")
+
+        if (apk.exists()) {
+            flutterOutput.mkdirs()
+            copy {
+                from apk
+                into flutterOutput
+                rename { "app-release.apk" }
+            }
+            println("APK copied to Flutter output: ${flutterOutput}/app-release.apk")
+        } else {
+            throw new GradleException("Release APK not found: ${apk}")
+        }
+    }
+}
