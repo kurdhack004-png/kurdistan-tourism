@@ -48,6 +48,26 @@ jobs:
       - name: Build release APK
         run: flutter build apk --release
 
+      - name: Locate APK
+        run: |
+          echo "Searching for APK files..."
+          find build android/app/build -type f -name "*.apk" -print 2>/dev/null || true
+
+          APK=$(find android/app/build/outputs -type f -name "*.apk" | head -1)
+
+          if [ -z "$APK" ]; then
+            APK=$(find build/app/outputs -type f -name "*.apk" | head -1)
+          fi
+
+          if [ -z "$APK" ]; then
+            echo "ERROR: No APK found"
+            exit 1
+          fi
+
+          echo "Found APK: $APK"
+          mkdir -p build/app/outputs/flutter-apk
+          cp "$APK" build/app/outputs/flutter-apk/app-release.apk
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
