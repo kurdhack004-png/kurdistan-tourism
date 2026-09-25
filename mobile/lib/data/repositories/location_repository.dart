@@ -17,10 +17,10 @@ class LocationRepository {
     double radiusMeters = 1000000,
   }) async {
     try {
-      final res = await _api.client.get('/locations', queryParameters: {
-        'near_lat': lat,
-        'near_lng': lng,
-        'radius_m': radiusMeters,
+      final res = await _api.client.get('/locations/nearby', queryParameters: {
+        'latitude': lat,
+        'longitude': lng,
+        'radius': radiusMeters > 100000 ? 100000 : radiusMeters,
       });
       final raw = res.data is Map ? res.data['data'] : null;
       final list = raw is Map ? raw['data'] : raw;
