@@ -16,40 +16,29 @@ class LocationsMapScreen extends ConsumerStatefulWidget {
   final TouristLocation? focusLocation;
 
   @override
-  ConsumerState<LocationsMapScreen> createState() =>
-      _LocationsMapScreenState();
+  ConsumerState<LocationsMapScreen> createState() => _LocationsMapScreenState();
 }
 
-class _LocationsMapScreenState
-    extends ConsumerState<LocationsMapScreen> {
+class _LocationsMapScreenState extends ConsumerState<LocationsMapScreen> {
   static const _mapStyleUrl = String.fromEnvironment(
     'MAP_STYLE_URL',
     defaultValue: 'https://demotiles.maplibre.org/style.json',
   );
 
   late LatLng _center;
-
   MapLibreMapController? _mapController;
-
   List<TouristLocation> _locations = const [];
-
   bool _styleReady = false;
   bool _locating = false;
-
   Position? _currentPosition;
 
   @override
   void initState() {
     super.initState();
-
     final location = widget.focusLocation;
-
     _center = location == null
         ? const LatLng(36.1911, 44.0092)
-        : LatLng(
-            location.latitude,
-            location.longitude,
-          );
+        : LatLng(location.latitude, location.longitude);
 
     if (location == null) {
       _resolveCurrentPosition();
@@ -93,10 +82,7 @@ class _LocationsMapScreenState
 
       if (position != null) {
         _currentPosition = position;
-        _center = LatLng(
-          position.latitude,
-          position.longitude,
-        );
+        _center = LatLng(position.latitude, position.longitude);
       }
     });
 
@@ -104,10 +90,7 @@ class _LocationsMapScreenState
       try {
         await _mapController!.animateCamera(
           CameraUpdate.newLatLngZoom(
-            LatLng(
-              position.latitude,
-              position.longitude,
-            ),
+            LatLng(position.latitude, position.longitude),
             12,
           ),
         );
@@ -115,24 +98,20 @@ class _LocationsMapScreenState
     }
   }
 
-  Future<void> _openDirections(
-    TouristLocation location,
-  ) async {
+  Future<void> _openDirections(TouristLocation location) async {
     final uri = Uri.parse(
       'https://www.google.com/maps/dir/?api=1'
       '&destination=${location.latitude},${location.longitude}',
     );
 
-    if (!await launchUrl(
+    final opened = await launchUrl(
       uri,
       mode: LaunchMode.externalApplication,
-    )) {
-      if (!mounted) return;
+    );
 
+    if (!opened && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('map_open_failed'.tr()),
-        ),
+        SnackBar(content: Text('map_open_failed'.tr())),
       );
     }
   }
@@ -157,30 +136,23 @@ class _LocationsMapScreenState
 
   Future<void> _plotMarkers() async {
     final controller = _mapController;
+    if (controller == null || !_styleReady) return;
 
-    if (controller == null || !_styleReady) {
-      return;
-    }
+    // Capture inherited-widget values before the first async gap.
+    final languageCode = context.locale.languageCode;
 
     try {
       await controller.clearSymbols();
     } catch (_) {}
 
-    if (_locations.isEmpty) {
-      return;
-    }
+    if (_locations.isEmpty) return;
 
     final symbols = <SymbolOptions>[];
-
-    final languageCode = context.locale.languageCode;
 
     for (final location in _locations) {
       symbols.add(
         SymbolOptions(
-          geometry: LatLng(
-            location.latitude,
-            location.longitude,
-          ),
+          geometry: LatLng(location.latitude, location.longitude),
           textField: location.localizedName(languageCode),
           textSize: 11,
           textOffset: const Offset(0, 1.6),
@@ -203,39 +175,32 @@ class _LocationsMapScreenState
             .toList(),
       );
     } catch (_) {
-      // Keep the map visible even if annotation rendering fails.
-      // The list/detail UI remains usable.
       return;
     }
 
+    if (!mounted) return;
+
     if (controller.onSymbolTapped.isEmpty) {
-      controller.onSymbolTapped.add(
-        (symbol) {
-          final data = symbol.data;
+      controller.onSymbolTapped.add((symbol) {
+        final data = symbol.data;
+        if (data == null) return;
 
-          if (data == null) return;
+        final locationId = data['location_id']?.toString();
+        if (locationId == null) return;
 
-          final locationId = data['location_id']?.toString();
-
-          if (locationId == null) return;
-
-          for (final location in _locations) {
-            if (location.id == locationId) {
-              _openLocation(location);
-              return;
-            }
+        for (final location in _locations) {
+          if (location.id == locationId) {
+            _openLocation(location);
+            return;
           }
-        },
-      );
+        }
+      });
     }
   }
 
   double _distanceKm(TouristLocation location) {
     final position = _currentPosition;
-
-    if (position == null) {
-      return 0;
-    }
+    if (position == null) return 0;
 
     return Geolocator.distanceBetween(
           position.latitude,
@@ -249,9 +214,7 @@ class _LocationsMapScreenState
   void _openLocation(TouristLocation location) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => LocationDetailScreen(
-          location: location,
-        ),
+        builder: (_) => LocationDetailScreen(location: location),
       ),
     );
   }
@@ -260,10 +223,7 @@ class _LocationsMapScreenState
   Widget build(BuildContext context) {
     final nearby = ref.watch(
       nearbyLocationsProvider(
-        NearbyParams(
-          _center.latitude,
-          _center.longitude,
-        ),
+        NearbyParams(_center.latitude, _center.longitude),
       ),
     );
 
@@ -287,8 +247,7 @@ class _LocationsMapScreenState
                 styleString: _mapStyleUrl,
                 initialCameraPosition: CameraPosition(
                   target: _center,
-                  zoom:
-                      widget.focusLocation == null ? 8.5 : 12,
+                  zoom: widget.focusLocation == null ? 8.5 : 12,
                 ),
                 myLocationEnabled: false,
                 compassEnabled: true,
@@ -299,7 +258,6 @@ class _LocationsMapScreenState
                 onMapCreated: _onMapCreated,
                 onStyleLoadedCallback: _onStyleLoaded,
               ),
-
               if (!_styleReady)
                 const Positioned(
                   top: 12,
@@ -316,9 +274,7 @@ class _LocationsMapScreenState
                           SizedBox(
                             width: 16,
                             height: 16,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                            ),
+                            child: CircularProgressIndicator(strokeWidth: 2),
                           ),
                           SizedBox(width: 8),
                           Text('Loading map...'),
@@ -327,7 +283,6 @@ class _LocationsMapScreenState
                     ),
                   ),
                 ),
-
               Positioned(
                 right: 12,
                 top: 12,
@@ -335,38 +290,27 @@ class _LocationsMapScreenState
                   children: [
                     FloatingActionButton.small(
                       heroTag: 'my-location',
-                      onPressed:
-                          _locating ? null : _resolveCurrentPosition,
+                      onPressed: _locating ? null : _resolveCurrentPosition,
                       tooltip: 'my_location'.tr(),
                       child: _locating
                           ? const SizedBox(
                               width: 18,
                               height: 18,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                              ),
+                              child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Icon(
-                              Icons.my_location_rounded,
-                            ),
+                          : const Icon(Icons.my_location_rounded),
                     ),
                     const SizedBox(height: 8),
                     if (widget.focusLocation != null)
                       FloatingActionButton.small(
                         heroTag: 'directions',
-                        onPressed: () =>
-                            _openDirections(
-                          widget.focusLocation!,
-                        ),
+                        onPressed: () => _openDirections(widget.focusLocation!),
                         tooltip: 'directions'.tr(),
-                        child: const Icon(
-                          Icons.directions_rounded,
-                        ),
+                        child: const Icon(Icons.directions_rounded),
                       ),
                   ],
                 ),
               ),
-
               Positioned(
                 left: 16,
                 right: 16,
@@ -384,18 +328,13 @@ class _LocationsMapScreenState
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            _currentPosition != null &&
-                                    items.isNotEmpty
-                                ? '${'places_on_map'.tr(
-                                    namedArgs: {
-                                      'count':
-                                          items.length.toString(),
-                                    },
-                                  )} • ${_distanceKm(items.first).toStringAsFixed(1)} km'
+                            _currentPosition != null && items.isNotEmpty
+                                ? '${'places_on_map'.tr(namedArgs: {
+                                    'count': items.length.toString(),
+                                  })} • ${_distanceKm(items.first).toStringAsFixed(1)} km'
                                 : 'places_on_map'.tr(
                                     namedArgs: {
-                                      'count':
-                                          items.length.toString(),
+                                      'count': items.length.toString(),
                                     },
                                   ),
                             maxLines: 1,
@@ -405,20 +344,15 @@ class _LocationsMapScreenState
                         if (items.isNotEmpty)
                           IconButton(
                             tooltip: 'directions'.tr(),
-                            onPressed: () =>
-                                _openDirections(items.first),
-                            icon: const Icon(
-                              Icons.directions_rounded,
-                            ),
+                            onPressed: () => _openDirections(items.first),
+                            icon: const Icon(Icons.directions_rounded),
                           ),
                         IconButton(
                           tooltip: 'details'.tr(),
                           onPressed: items.isEmpty
                               ? null
                               : () => _openLocation(items.first),
-                          icon: const Icon(
-                            Icons.chevron_left_rounded,
-                          ),
+                          icon: const Icon(Icons.chevron_left_rounded),
                         ),
                       ],
                     ),
@@ -428,9 +362,7 @@ class _LocationsMapScreenState
             ],
           );
         },
-        loading: () => const Center(
-          child: CircularProgressIndicator(),
-        ),
+        loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
