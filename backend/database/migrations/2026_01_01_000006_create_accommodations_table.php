@@ -10,8 +10,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('accommodations', function (Blueprint $table) {
-            $table->uuid('id')->primary()->default(DB::raw('uuid_generate_v4()'));
-            $table->foreignUuid('owner_id')->nullable()->constrained('users');
+            $table->id();
+            $table->foreignId('owner_id')->nullable()->constrained('users');
             $table->string('type', 30); // hotel|chalet|guesthouse|campsite|eco_lodge
             $table->string('name_ckb', 200);
             $table->decimal('price_per_night', 10, 2)->nullable();
