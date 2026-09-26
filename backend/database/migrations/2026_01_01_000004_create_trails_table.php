@@ -10,14 +10,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('trails', function (Blueprint $table) {
-            $table->uuid('id')->primary()->default(DB::raw('uuid_generate_v4()'));
-            $table->foreignUuid('location_id')->nullable()->constrained('locations');
+            $table->id();
+            $table->foreignId('location_id')->nullable()->constrained('locations');
             $table->string('name_ckb', 200);
             $table->string('difficulty', 20)->default('moderate'); // easy|moderate|hard
             $table->decimal('distance_km', 6, 2)->nullable();
             $table->integer('elevation_gain_m')->nullable();
             $table->jsonb('waypoints')->nullable();
-            $table->foreignUuid('created_by')->nullable()->constrained('users');
+            $table->foreignId('created_by')->nullable()->constrained('users');
             $table->timestamps();
         });
 
