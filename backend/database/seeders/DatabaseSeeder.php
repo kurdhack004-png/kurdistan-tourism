@@ -40,5 +40,7 @@ class DatabaseSeeder extends Seeder
                 ['name_ckb' => $ckb, 'name_ar' => $ar]
             );
         }
+
+        $this->call(RealTourismDataSeeder::class);
     }
 }
