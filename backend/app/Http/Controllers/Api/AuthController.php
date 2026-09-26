@@ -20,12 +20,15 @@ class AuthController extends Controller
             'phone_number' => ['nullable', 'string', 'max:30'],
             // Enforced strength — the V8.1 starter accepted anything.
             'password' => ['required', 'string', 'min:10', 'confirmed'],
+            'preferred_lang' => ['nullable', 'in:ckb,ar,en'],
         ]);
 
         $user = User::create([
             ...$data,
             'password' => Hash::make($data['password']), // bcrypt/argon2id, never plaintext
             'role' => 'tourist',
+            'preferred_lang' => $data['preferred_lang'] ?? 'ckb',
+            'is_active' => true,
         ]);
 
         $token = $user->createToken('mobile', ['*'], now()->addDays(30))->plainTextToken;
@@ -51,7 +54,7 @@ class AuthController extends Controller
             'password' => ['required', 'string'],
         ]);
 
-        if (! Auth::attempt($credentials)) {
+        if (! Auth::attempt([...$credentials, 'is_active' => true])) {
             RateLimiter::hit($key, 60);
             throw ValidationException::withMessages(['email' => ['Invalid credentials.']]);
         }
