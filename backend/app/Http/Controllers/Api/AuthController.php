@@ -24,6 +24,7 @@ class AuthController extends Controller
         ]);
 
         $user = User::create([
+            'name' => $data['full_name'],
             ...$data,
             'password' => Hash::make($data['password']), // bcrypt/argon2id, never plaintext
             'role' => 'tourist',
