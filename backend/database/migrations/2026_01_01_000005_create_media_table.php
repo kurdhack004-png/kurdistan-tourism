@@ -10,9 +10,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('media', function (Blueprint $table) {
-            $table->uuid('id')->primary()->default(DB::raw('uuid_generate_v4()'));
+            $table->id();
             $table->string('mediable_type', 50); // 'location' | 'trail' | 'accommodation' | ...
-            $table->uuid('mediable_id');
+            $table->unsignedBigInteger('mediable_id');
             $table->string('type', 20); // image|video|360|audio|gpx
             $table->string('storage_key', 500); // S3/MinIO object key
             $table->string('caption')->nullable();
