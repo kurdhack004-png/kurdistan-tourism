@@ -1,0 +1,24 @@
+name: Temporary Neon Test Database
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  provision:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Provision temporary Neon database
+        run: |
+          npm install -g neon@latest
+          neon claim create --service postgres --env-pull > neon-output.txt 2>&1 || neon claim create --env-pull > neon-output.txt 2>&1
+          cat neon-output.txt
+      - name: Save connection details as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: temporary-neon-connection
+          path: |
+            neon-output.txt
+          retention-days: 1
