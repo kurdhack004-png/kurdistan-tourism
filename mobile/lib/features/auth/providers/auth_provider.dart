@@ -1,20 +1,17 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/api_client.dart';
-import '../../../data/local/demo_auth.dart';
 
 class AuthState {
   const AuthState({
     this.isAuthenticated = false,
     this.isLoading = false,
     this.error,
-    this.isLocalMode = false,
     this.role,
   });
 
   final bool isAuthenticated;
   final bool isLoading;
   final String? error;
-  final bool isLocalMode;
   final String? role;
 
   AuthState copyWith({
@@ -22,14 +19,12 @@ class AuthState {
     bool? isLoading,
     String? error,
     bool clearError = false,
-    bool? isLocalMode,
     String? role,
   }) =>
       AuthState(
         isAuthenticated: isAuthenticated ?? this.isAuthenticated,
         isLoading: isLoading ?? this.isLoading,
         error: clearError ? null : (error ?? this.error),
-        isLocalMode: isLocalMode ?? this.isLocalMode,
         role: role ?? this.role,
       );
 }
@@ -54,8 +49,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> _restoreSession() async {
     final token = await _api.readToken();
     if (token != null) {
-      state = state.copyWith(isAuthenticated: true, isLocalMode: token.startsWith('local_demo_'));
-      if (!token.startsWith('local_demo_')) await _loadRole();
+      state = state.copyWith(isAuthenticated: true);
+      await _loadRole();
     }
   }
 
@@ -78,26 +73,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
       state = state.copyWith(
         isAuthenticated: true,
         isLoading: false,
-        isLocalMode: false,
       );
       await _loadRole();
     } catch (_) {
-      final ok = await DemoAuth.login(email, password);
-      if (ok) {
-        await _api.saveToken('local_demo_${email.trim().toLowerCase()}');
-        state = state.copyWith(
-          isAuthenticated: true,
-          isLoading: false,
-          isLocalMode: true,
-        );
-      } else {
-        state = state.copyWith(
-          isLoading: false,
-          isAuthenticated: false,
-          error: 'auth_login_failed',
-          isLocalMode: false,
-        );
-      }
+      state = state.copyWith(
+        isLoading: false,
+        isAuthenticated: false,
+        error: 'auth_login_failed',
+      );
     }
   }
 
@@ -132,12 +115,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
         isLocalMode: false,
       );
     } catch (_) {
-      await DemoAuth.register(fullName, email, password);
-      await _api.saveToken('local_demo_${email.trim().toLowerCase()}');
       state = state.copyWith(
-        isAuthenticated: true,
         isLoading: false,
-        isLocalMode: true,
+        isAuthenticated: false,
+        error: 'auth_register_failed',
       );
     }
   }

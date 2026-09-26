@@ -23,3 +23,7 @@ services:
         value: file
       - key: QUEUE_CONNECTION
         value: sync
+      - key: DATABASE_URL
+        sync: false
+      - key: APP_URL
+        sync: false

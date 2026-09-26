@@ -21,7 +21,6 @@ dependencies:
   cached_network_image: ^3.3.1
   url_launcher: ^6.3.0            # tel: links and opening the map app for directions
   uuid: ^4.4.0                    # idempotency keys for payment requests
-  crypto: ^3.0.7                    # local demo-auth password hashing
   file_picker: ^8.1.7                # admin media uploads
 
 dev_dependencies:
