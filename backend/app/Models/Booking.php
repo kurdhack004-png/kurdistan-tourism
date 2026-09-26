@@ -2,13 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
 class Booking extends Model
 {
-    use HasUuids;
-
     protected $fillable = [
         'user_id', 'accommodation_id', 'check_in', 'check_out', 'guests', 'status', 'total_price',
     ];
