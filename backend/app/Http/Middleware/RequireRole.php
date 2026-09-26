@@ -8,13 +8,15 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RequireRole
 {
-    /** Usage in routes: ->middleware('role:admin,guide') */
     public function handle(Request $request, Closure $next, string ...$roles): Response
     {
         $user = $request->user();
 
-        if (! $user || ! in_array($user->role, $roles, true)) {
-            return response()->json(['success' => false, 'error' => 'Forbidden'], 403);
+        if (! $user || ! $user->is_active || ! in_array($user->role, $roles, true)) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Forbidden',
+            ], 403);
         }
 
         return $next($request);
