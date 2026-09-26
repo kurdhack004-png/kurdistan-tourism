@@ -32,7 +32,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/auth/me', [AuthController::class, 'me']);
     Route::post('/auth/logout', [AuthController::class, 'logout']);
 
-    Route::post('/locations', [LocationController::class, 'store']);
+    Route::middleware('role:editor,admin,super-admin')->group(function () {
+        Route::post('/locations', [LocationController::class, 'store']);
+    });
     Route::post('/reviews', [ReviewController::class, 'store']);
 
     Route::get('/bookings', [BookingController::class, 'index']);
@@ -44,7 +46,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/favorites', [FavoriteController::class, 'store']);
     Route::delete('/favorites/{type}/{id}', [FavoriteController::class, 'destroy']);
 
-    Route::middleware('role:admin')->prefix('admin')->group(function () {
+    Route::middleware('role:admin,super-admin')->prefix('admin')->group(function () {
         Route::get('/dashboard', DashboardController::class);
         Route::get('/locations', [AdminController::class, 'locations']);
         Route::post('/locations', [AdminController::class, 'storeLocation']);
@@ -71,7 +73,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/ads/{id}', [AdminController::class, 'deleteAd']);
     });
 
-    Route::middleware('role:guide,admin')->group(function () {
+    Route::middleware('role:editor,guide,admin,super-admin')->group(function () {
         Route::patch('/locations/{id}/verify', function (string $id) {
             $location = \App\Models\Location::findOrFail($id);
             $location->update(['is_verified' => true]);

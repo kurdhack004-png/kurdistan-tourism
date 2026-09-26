@@ -143,6 +143,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> logout() async {
+    if (state.isAuthenticated && !state.isLocalMode) {
+      try {
+        await _api.client.post('/auth/logout');
+      } catch (_) {}
+    }
     await _api.clearToken();
     state = const AuthState();
   }
