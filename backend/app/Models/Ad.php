@@ -2,13 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
 class Ad extends Model
 {
-    use HasUuids;
-
     protected $fillable = [
         'created_by','title_ckb','title_ar','title_en',
         'description_ckb','description_ar','description_en',
