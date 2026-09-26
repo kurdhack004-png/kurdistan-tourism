@@ -4,13 +4,10 @@ namespace App\Models;
 
 use Clickbar\Magellan\Data\Geometries\Point;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
 class Accommodation extends Model
 {
-    use HasUuids;
-
     protected $fillable = [
         'owner_id','type','name_ckb','name_ar','name_en',
         'description_ckb','description_ar','description_en',

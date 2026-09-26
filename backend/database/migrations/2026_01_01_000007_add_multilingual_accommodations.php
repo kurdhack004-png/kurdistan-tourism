@@ -8,24 +8,25 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('accommodations', function (Blueprint $table) {
-            $table->string('name_ar', 200)->nullable()->after('name_ckb');
-            $table->string('name_en', 200)->nullable()->after('name_ar');
-            $table->text('description_ckb')->nullable()->after('name_en');
-            $table->text('description_ar')->nullable()->after('description_ckb');
-            $table->text('description_en')->nullable()->after('description_ar');
-            $table->string('city_ckb', 120)->nullable()->after('description_en');
-            $table->string('city_ar', 120)->nullable()->after('city_ckb');
-            $table->string('city_en', 120)->nullable()->after('city_ar');
-            $table->decimal('rating', 3, 2)->default(0)->after('price_per_night');
-            $table->unsignedInteger('review_count')->default(0)->after('rating');
-        });
+        if (! Schema::hasTable('accommodations')) return;
+
+        foreach ([
+            'name_ar' => fn (Blueprint $t) => $t->string('name_ar', 200)->nullable(),
+            'name_en' => fn (Blueprint $t) => $t->string('name_en', 200)->nullable(),
+            'description_ckb' => fn (Blueprint $t) => $t->text('description_ckb')->nullable(),
+            'description_ar' => fn (Blueprint $t) => $t->text('description_ar')->nullable(),
+            'description_en' => fn (Blueprint $t) => $t->text('description_en')->nullable(),
+            'city_ckb' => fn (Blueprint $t) => $t->string('city_ckb', 120)->nullable(),
+            'city_ar' => fn (Blueprint $t) => $t->string('city_ar', 120)->nullable(),
+            'city_en' => fn (Blueprint $t) => $t->string('city_en', 120)->nullable(),
+            'rating' => fn (Blueprint $t) => $t->decimal('rating', 3, 2)->default(0),
+            'review_count' => fn (Blueprint $t) => $t->unsignedInteger('review_count')->default(0),
+        ] as $column => $definition) {
+            if (! Schema::hasColumn('accommodations', $column)) {
+                Schema::table('accommodations', $definition);
+            }
+        }
     }
 
-    public function down(): void
-    {
-        Schema::table('accommodations', function (Blueprint $table) {
-            $table->dropColumn(['name_ar','name_en','description_ckb','description_ar','description_en','city_ckb','city_ar','city_en','rating','review_count']);
-        });
-    }
+    public function down(): void {}
 };

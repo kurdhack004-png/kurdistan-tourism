@@ -14,9 +14,9 @@ return new class extends Migration
         DB::statement("CREATE TYPE payment_status AS ENUM ('pending','paid','failed','refunded')");
 
         Schema::create('bookings', function (Blueprint $table) {
-            $table->uuid('id')->primary()->default(DB::raw('uuid_generate_v4()'));
-            $table->foreignUuid('user_id')->constrained('users');
-            $table->foreignUuid('accommodation_id')->constrained('accommodations');
+            $table->id();
+            $table->foreignId('user_id')->constrained('users');
+            $table->foreignId('accommodation_id')->constrained('accommodations');
             $table->date('check_in');
             $table->date('check_out');
             $table->integer('guests')->default(1);
@@ -27,8 +27,8 @@ return new class extends Migration
         DB::statement('ALTER TABLE bookings ALTER COLUMN status TYPE booking_status USING status::booking_status');
 
         Schema::create('payments', function (Blueprint $table) {
-            $table->uuid('id')->primary()->default(DB::raw('uuid_generate_v4()'));
-            $table->foreignUuid('booking_id')->constrained('bookings');
+            $table->id();
+            $table->foreignId('booking_id')->constrained('bookings');
             $table->string('method');
             $table->string('status')->default('pending');
             $table->decimal('amount', 10, 2);

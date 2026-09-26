@@ -9,8 +9,8 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('ads', function (Blueprint $table) {
-            $table->uuid('id')->primary()->default(DB::raw('uuid_generate_v4()'));
-            $table->foreignUuid('created_by')->constrained('users');
+            $table->id();
+            $table->foreignId('created_by')->constrained('users');
             $table->string('title_ckb', 200);
             $table->string('title_ar', 200)->nullable();
             $table->string('title_en', 200)->nullable();
