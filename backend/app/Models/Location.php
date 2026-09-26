@@ -4,14 +4,11 @@ namespace App\Models;
 
 use Clickbar\Magellan\Data\Geometries\Point;
 use Clickbar\Magellan\Database\PostgisFunctions\MagellanExpression;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 
 class Location extends Model
 {
-    use HasUuids;
-
     protected $fillable = [
         'category', 'governorate_id', 'district_id', 'name_ckb', 'name_ar', 'name_en',
         'description_ckb', 'description_ar', 'description_en', 'geom', 'elevation_meters',
