@@ -21,8 +21,13 @@ RUN cat > /usr/local/bin/start.sh <<'SH'
 set -eu
 
 if [ -z "${APP_KEY:-}" ]; then
-  php artisan key:generate --force
+  export APP_KEY="$(php artisan key:generate --show)"
 fi
+
+mkdir -p /data/storage/framework/cache /data/storage/framework/sessions /data/storage/framework/views /data/bootstrap-cache
+rm -rf storage bootstrap/cache
+ln -s /data/storage storage
+ln -s /data/bootstrap-cache bootstrap/cache
 
 php artisan config:clear
 php artisan route:clear
