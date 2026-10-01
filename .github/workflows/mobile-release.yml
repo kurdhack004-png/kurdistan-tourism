@@ -40,11 +40,14 @@ jobs:
       - name: Analyze
         run: flutter analyze
 
-      - name: Verify Java
+      - name: Force Gradle to use Java 21
         run: |
+          echo "JAVA_HOME=$JAVA_HOME"
           java -version
           javac -version
-          echo "JAVA_HOME=$JAVA_HOME"
+          echo "org.gradle.java.home=$JAVA_HOME" >> android/gradle.properties
+          cd android
+          ./gradlew -version
 
       - name: Build APK
         env:
