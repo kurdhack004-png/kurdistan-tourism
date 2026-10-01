@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/mountain_ridge_divider.dart';
@@ -13,6 +14,15 @@ import 'widgets/rating_badge.dart';
 import 'locations_map_screen.dart';
 
 class LocationDetailScreen extends ConsumerWidget {
+  Future<void> _openGoogleMaps() async {
+    final uri = Uri.parse('https://www.google.com/maps/dir/?api=1&destination=${location.latitude},${location.longitude}');
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
+  Future<void> _openWaze() async {
+    final uri = Uri.parse('https://waze.com/ul?ll=${location.latitude},${location.longitude}&navigate=yes');
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
   const LocationDetailScreen({super.key, required this.location});
 
   final TouristLocation location;
@@ -144,6 +154,26 @@ class LocationDetailScreen extends ConsumerWidget {
                           ),
                           icon: const Icon(Icons.map_outlined, size: 18),
                           label: const Text('لەسەر نەخشە'),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: FilledButton.icon(
+                          onPressed: _openGoogleMaps,
+                          icon: const Icon(Icons.map_rounded, size: 18),
+                          label: const Text('Google Maps'),
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: _openWaze,
+                          icon: const Icon(Icons.navigation_rounded, size: 18),
+                          label: const Text('Waze'),
                         ),
                       ),
                     ],
