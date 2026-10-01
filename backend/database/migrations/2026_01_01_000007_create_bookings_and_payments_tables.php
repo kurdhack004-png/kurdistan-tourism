@@ -24,7 +24,9 @@ return new class extends Migration
             $table->decimal('total_price', 10, 2);
             $table->timestamps();
         });
+        DB::statement('ALTER TABLE bookings ALTER COLUMN status DROP DEFAULT');
         DB::statement('ALTER TABLE bookings ALTER COLUMN status TYPE booking_status USING status::booking_status');
+        DB::statement("ALTER TABLE bookings ALTER COLUMN status SET DEFAULT 'pending'::booking_status");
 
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
@@ -37,8 +39,11 @@ return new class extends Migration
             $table->string('idempotency_key', 64)->unique();
             $table->timestamps();
         });
+        DB::statement('ALTER TABLE payments ALTER COLUMN method DROP DEFAULT');
         DB::statement('ALTER TABLE payments ALTER COLUMN method TYPE payment_method USING method::payment_method');
+        DB::statement('ALTER TABLE payments ALTER COLUMN status DROP DEFAULT');
         DB::statement('ALTER TABLE payments ALTER COLUMN status TYPE payment_status USING status::payment_status');
+        DB::statement("ALTER TABLE payments ALTER COLUMN status SET DEFAULT 'pending'::payment_status");
     }
 
     public function down(): void
