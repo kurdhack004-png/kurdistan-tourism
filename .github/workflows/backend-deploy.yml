@@ -2,12 +2,6 @@ name: Backend Deploy
 
 on:
   workflow_dispatch:
-  push:
-    branches: [master]
-    paths:
-      - 'backend/**'
-      - 'render.yaml'
-      - '.github/workflows/backend-deploy.yml'
 
 permissions:
   contents: read
