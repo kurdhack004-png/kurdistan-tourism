@@ -1,25 +1,26 @@
 services:
   - type: web
     name: kurdistan-tourism-api
-    runtime: docker
-    rootDir: backend
-    dockerfilePath: ./Dockerfile
-    dockerContext: ./backend
+    runtime: node
+    rootDir: backend-node
+    buildCommand: npm install
+    startCommand: npm start
     healthCheckPath: /api/health
+    autoDeploy: true
     envVars:
-      - key: APP_ENV
+      - key: NODE_ENV
         value: production
-      - key: APP_DEBUG
-        value: "false"
-      - key: APP_KEY
+      - key: PORT
+        value: "10000"
+      - key: JWT_SECRET
         generateValue: true
-      - key: LOG_CHANNEL
-        value: stderr
-      - key: DB_CONNECTION
-        value: pgsql
-      - key: CACHE_STORE
-        value: file
-      - key: SESSION_DRIVER
-        value: file
-      - key: QUEUE_CONNECTION
-        value: sync
+      - key: DATABASE_URL
+        sync: false
+      - key: PGSSL
+        value: "require"
+      - key: ADMIN_EMAIL
+        value: admin@kurdistantourism.local
+      - key: ADMIN_PASSWORD
+        generateValue: true
+      - key: CORS_ORIGIN
+        value: "*"
