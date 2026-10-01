@@ -53,6 +53,8 @@ jobs:
           CACHE_STORE: array
           SESSION_DRIVER: array
           QUEUE_CONNECTION: sync
+          DB_SSLMODE: disable
+          PGSSLMODE: disable
         run: |
           php artisan migrate --force
           php artisan db:seed --class="Database\\Seeders\\TourismLocationsSeeder"
