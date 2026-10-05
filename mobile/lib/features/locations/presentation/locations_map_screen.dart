@@ -12,11 +12,12 @@ import 'location_detail_screen.dart';
 class LocationsMapScreen extends ConsumerStatefulWidget {
   const LocationsMapScreen({super.key, this.focusLocation});
   final TouristLocation? focusLocation;
-  @override ConsumerState<LocationsMapScreen> createState() => _LocationsMapScreenState();
+  @override
+  ConsumerState<LocationsMapScreen> createState() => _LocationsMapScreenState();
 }
 
 class _LocationsMapScreenState extends ConsumerState<LocationsMapScreen> {
-  static const _mapStyleUrl = String.fromEnvironment('MAP_STYLE_URL', defaultValue: 'https://demotiles.maplibre.org/style.json');
+  static const _mapStyleUrl = String.fromEnvironment('MAP_STYLE_URL', defaultValue: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json');
   late LatLng _center;
   MapLibreMapController? _mapController;
   List<TouristLocation> _locations = const [];
@@ -54,13 +55,8 @@ class _LocationsMapScreenState extends ConsumerState<LocationsMapScreen> {
     }
   }
 
-  Future<void> _openGoogleMaps(TouristLocation location) async {
-    await _launchExternal(Uri.parse('https://www.google.com/maps/dir/?api=1&destination=${location.latitude},${location.longitude}'));
-  }
-
-  Future<void> _openWaze(TouristLocation location) async {
-    await _launchExternal(Uri.parse('https://www.waze.com/ul?ll=${location.latitude}%2C${location.longitude}&navigate=yes'));
-  }
+  Future<void> _openGoogleMaps(TouristLocation location) async => _launchExternal(Uri.parse('https://www.google.com/maps/dir/?api=1&destination=${location.latitude},${location.longitude}'));
+  Future<void> _openWaze(TouristLocation location) async => _launchExternal(Uri.parse('https://www.waze.com/ul?ll=${location.latitude}%2C${location.longitude}&navigate=yes'));
 
   Future<void> _launchExternal(Uri uri) async {
     final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -91,17 +87,41 @@ class _LocationsMapScreenState extends ConsumerState<LocationsMapScreen> {
         _locations.map((location) => <String, dynamic>{'location_id': location.id}).toList(),
       );
     } catch (_) { return; }
-    if (!mounted || controller.onSymbolTapped.isNotEmpty) return;
+    if (!mounted) return;
+    controller.onSymbolTapped.clear();
     controller.onSymbolTapped.add((symbol) {
       final id = symbol.data?['location_id']?.toString();
-      if (id == null) return;
+      if (id == null || !mounted) return;
       for (final location in _locations) {
-        if (location.id == id) { _openLocation(location); break; }
+        if (location.id == id) { _showLocationSheet(location); break; }
       }
     });
   }
 
-  void _openLocation(TouristLocation location) => Navigator.of(context).push(MaterialPageRoute(builder: (_) => LocationDetailScreen(location: location)));
+  void _showLocationSheet(TouristLocation location) {
+    final languageCode = context.locale.languageCode;
+    showModalBottomSheet<void>(
+      context: context, showDragHandle: true, isScrollControlled: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
+      builder: (_) => SafeArea(child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 4, 20, 22),
+        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            Container(width: 46, height: 46, decoration: BoxDecoration(color: AppColors.saffron.withValues(alpha: .14), borderRadius: BorderRadius.circular(14)), child: const Icon(Icons.place_rounded, color: AppColors.saffron)),
+            const SizedBox(width: 12), Expanded(child: Text(location.localizedName(languageCode), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800))),
+          ]),
+          const SizedBox(height: 12),
+          Row(children: [
+            Expanded(child: OutlinedButton.icon(onPressed: () => _openGoogleMaps(location), icon: const Icon(Icons.map_rounded), label: const Text('Google Maps'))),
+            const SizedBox(width: 8),
+            Expanded(child: OutlinedButton.icon(onPressed: () => _openWaze(location), icon: const Icon(Icons.navigation_rounded), label: const Text('Waze'))),
+          ]),
+          const SizedBox(height: 4),
+          SizedBox(width: double.infinity, child: FilledButton.icon(onPressed: () { Navigator.pop(context); Navigator.of(context).push(MaterialPageRoute(builder: (_) => LocationDetailScreen(location: location))); }, icon: const Icon(Icons.info_outline_rounded), label: Text('details'.tr()))),
+        ]),
+      )),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -133,9 +153,7 @@ class _LocationsMapScreenState extends ConsumerState<LocationsMapScreen> {
             Positioned(left: 12, right: 12, bottom: 12, child: Card(margin: EdgeInsets.zero, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)), child: Padding(padding: const EdgeInsets.all(12), child: Row(children: [
               Container(width: 38, height: 38, decoration: BoxDecoration(color: AppColors.saffron.withValues(alpha: .12), borderRadius: BorderRadius.circular(12)), child: const Icon(Icons.place_rounded, color: AppColors.saffron)),
               const SizedBox(width: 9), Expanded(child: Text('places_on_map'.tr(namedArgs: {'count': items.length.toString()}), maxLines: 1, overflow: TextOverflow.ellipsis)),
-              if (items.isNotEmpty) PopupMenuButton<String>(tooltip: 'directions'.tr(), onSelected: (value) => value == 'waze' ? _openWaze(items.first) : _openGoogleMaps(items.first), itemBuilder: (_) => [
-                PopupMenuItem(value: 'google', child: Text('Google Maps')), PopupMenuItem(value: 'waze', child: Text('Waze')),
-              ], child: const Icon(Icons.directions_rounded)),
+              if (items.isNotEmpty) PopupMenuButton<String>(tooltip: 'directions'.tr(), onSelected: (value) => value == 'waze' ? _openWaze(items.first) : _openGoogleMaps(items.first), itemBuilder: (_) => [const PopupMenuItem(value: 'google', child: Text('Google Maps')), const PopupMenuItem(value: 'waze', child: Text('Waze'))], child: const Icon(Icons.directions_rounded)),
             ]))))),
           ]);
         },
