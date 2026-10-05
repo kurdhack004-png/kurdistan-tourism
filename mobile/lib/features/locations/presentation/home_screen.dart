@@ -19,11 +19,6 @@ import 'widgets/location_card.dart';
 import 'location_detail_screen.dart';
 
 const _categories = ['all', 'mountains', 'lakes', 'caves', 'waterfalls'];
-
-/// The 5 scenes the hero banner cycles through, one every 5 seconds.
-/// These reuse the same category icon/gradient language as the rest of
-/// the app (see `categoryVisual`) rather than stock photos, so the
-/// rotation stays on-brand and needs no network access to render.
 const _heroSlides = [
   ('mountain', 'hero_mountains'),
   ('lake', 'hero_lakes'),
@@ -46,30 +41,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final languageCode = context.locale.languageCode;
-    // Erbil as the default center — the repository already falls back to
-    // cached/offline data when there's no connection.
     final nearby = ref.watch(nearbyLocationsProvider(const NearbyParams(36.1911, 44.0092)));
 
     return Scaffold(
       body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
         slivers: [
           SliverToBoxAdapter(child: _Hero(count: nearby.value?.length)),
-          SliverToBoxAdapter(
-            child: MountainRidgeDivider(color: Theme.of(context).scaffoldBackgroundColor),
-          ),
+          SliverToBoxAdapter(child: MountainRidgeDivider(color: Theme.of(context).scaffoldBackgroundColor)),
           const SliverToBoxAdapter(child: _AdBanner()),
           SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 4, AppSpacing.lg, 0),
             sliver: SliverToBoxAdapter(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  _SectionTitle(
+                    title: 'nearby_places'.tr(),
+                    icon: Icons.explore_rounded,
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
                   CategoryTabBar(
                     categories: _categories,
                     selected: _selectedCategory,
                     onSelected: (c) => setState(() => _selectedCategory = c),
                   ),
-                  const SizedBox(height: AppSpacing.lg),
+                  const SizedBox(height: AppSpacing.md),
                   SafeBuild(
                     label: 'search-field',
                     builder: (_) => _SearchField(onChanged: (value) => setState(() => _query = value.trim())),
@@ -88,36 +85,55 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     loc.localizedName(languageCode).toLowerCase().contains(q) ||
                     (loc.localizedDescription(languageCode)?.toLowerCase().contains(q) ?? false);
                 if (_selectedCategory == 'all') return matchesSearch;
-                final category = _selectedCategory == 'mountains' ? 'mountain' : _selectedCategory == 'lakes' ? 'lake' : _selectedCategory == 'caves' ? 'cave' : 'waterfall';
-                final matchesCategory = loc.category == category;
-                return matchesSearch && matchesCategory;
+                final category = _selectedCategory == 'mountains'
+                    ? 'mountain'
+                    : _selectedCategory == 'lakes'
+                        ? 'lake'
+                        : _selectedCategory == 'caves'
+                            ? 'cave'
+                            : 'waterfall';
+                return matchesSearch && loc.category == category;
               }).toList();
+
+              if (filtered.isEmpty) {
+                return SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppSpacing.xl),
+                    child: _EmptyState(
+                      icon: Icons.search_off_rounded,
+                      text: 'data_load_failed'.tr(),
+                    ),
+                  ),
+                );
+              }
+
               return SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-              sliver: SliverList.builder(
-                itemCount: filtered.length,
-                itemBuilder: (context, i) {
-                  final loc = filtered[i];
-                  return SafeBuild(
-                    label: 'location-card:${loc.id}',
-                    builder: (_) => LocationCard(
-                      location: loc,
-                      rating: loc.rating,
-                      imageUrl: loc.imageUrl,
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => LocationDetailScreen(location: loc)),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                sliver: SliverList.builder(
+                  itemCount: filtered.length,
+                  itemBuilder: (context, i) {
+                    final loc = filtered[i];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                      child: SafeBuild(
+                        label: 'location-card:${loc.id}',
+                        builder: (_) => LocationCard(
+                          location: loc,
+                          rating: loc.rating,
+                          imageUrl: loc.imageUrl,
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => LocationDetailScreen(location: loc)),
+                          ),
+                        ),
+                        fallback: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                          child: Text(loc.localizedName(languageCode), style: Theme.of(context).textTheme.bodyMedium),
+                        ),
                       ),
-                    ),
-                    // If a single item's data is ever malformed, show its
-                    // name only instead of taking down the whole list.
-                    fallback: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-                      child: Text(loc.localizedName(languageCode), style: Theme.of(context).textTheme.bodyMedium),
-                    ),
-                  );
-                },
-              ),
-            );
+                    );
+                  },
+                ),
+              );
             },
             loading: () => const SliverToBoxAdapter(
               child: Padding(
@@ -128,12 +144,69 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             error: (e, st) => SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.all(AppSpacing.xl),
-                child: Text('ئینتەرنێت نییە — داتای پاشەکەوتکراو پیشان دەدرێت',
-                    style: Theme.of(context).textTheme.bodyMedium),
+                child: _EmptyState(
+                  icon: Icons.cloud_off_rounded,
+                  text: 'no_connection_showing_cached'.tr(),
+                ),
               ),
             ),
           ),
-          const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xl)),
+          const SliverToBoxAdapter(child: SizedBox(height: 110)),
+        ],
+      ),
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle({required this.title, required this.icon});
+  final String title;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: AppColors.saffron.withValues(alpha: .12),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(icon, color: AppColors.saffron, size: 20),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            title,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _EmptyState extends StatelessWidget {
+  const _EmptyState({required this.icon, required this.text});
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: Theme.of(context).dividerColor.withValues(alpha: .4)),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, size: 42, color: AppColors.riverstone),
+          const SizedBox(height: 10),
+          Text(text, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium),
         ],
       ),
     );
@@ -160,9 +233,6 @@ class _HeroState extends ConsumerState<_Hero> {
     _startTimer();
   }
 
-  // Cycles to the next slide every `_intervalSec` seconds (5 by default,
-  // configurable from the admin dashboard). The timer is cancelled in
-  // dispose(), so it never fires after this widget is gone.
   void _startTimer() {
     _timer?.cancel();
     _timer = Timer.periodic(Duration(seconds: _intervalSec), (_) {
@@ -179,13 +249,8 @@ class _HeroState extends ConsumerState<_Hero> {
 
   @override
   Widget build(BuildContext context) {
-    // Images come from the admin dashboard. With no images (or offline) the
-    // 5 built-in category scenes are shown instead.
     final hero = ref.watch(heroProvider).value;
     final remoteImages = hero?.images ?? const <String>[];
-    // The product design is a five-slide hero. If the admin has fewer than
-    // five valid images, keep the built-in five scenes instead of rotating an
-    // incomplete banner.
     final useImages = remoteImages.length >= 5;
     final images = useImages ? remoteImages.take(5).toList(growable: false) : const <String>[];
     _slideCount = useImages ? images.length : _heroSlides.length;
@@ -199,13 +264,12 @@ class _HeroState extends ConsumerState<_Hero> {
     final (icon, tint) = categoryVisual(category);
 
     return Container(
-      height: 240,
+      height: 270,
       clipBehavior: Clip.hardEdge,
       decoration: const BoxDecoration(color: AppColors.ink),
       child: Stack(
         fit: StackFit.expand,
         children: [
-          // Rotating background: cross-fades between the slides.
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 700),
             child: useImages
@@ -230,23 +294,21 @@ class _HeroState extends ConsumerState<_Hero> {
                     alignment: Alignment.centerRight,
                     child: Padding(
                       padding: const EdgeInsets.only(right: AppSpacing.lg),
-                      child: Icon(icon, size: 96, color: Colors.white.withValues(alpha: 0.18)),
+                      child: Icon(icon, size: 112, color: Colors.white.withValues(alpha: 0.16)),
                     ),
                   ),
           ),
-          // Readability scrim over the image so text stays legible on
-          // every one of the 5 tints.
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [AppColors.ink.withValues(alpha: 0.35), AppColors.ink.withValues(alpha: 0.85)],
+                colors: [AppColors.ink.withValues(alpha: 0.20), AppColors.ink.withValues(alpha: 0.90)],
               ),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
+            padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 22, AppSpacing.lg, 18),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -254,71 +316,48 @@ class _HeroState extends ConsumerState<_Hero> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('app_slogan'.tr(),
-                        style: const TextStyle(color: AppColors.limestoneWhite, fontSize: 14, fontWeight: FontWeight.w500)),
-                    Row(
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.emergency_outlined, color: AppColors.limestoneWhite, size: 20),
-                          onPressed: () => Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => const EmergencyScreen())),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.notifications_outlined, color: AppColors.limestoneWhite, size: 20),
-                          onPressed: () => Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => const NotificationsScreen())),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // The rotating slide's own label fades in above the
-                    // fixed screen title, so the banner clearly reads as
-                    // "showcasing different things" rather than the
-                    // title itself changing underneath the user.
-                    if (!useImages) ...[
-                      AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 500),
-                        child: Text(
-                          label.tr(),
-                          key: ValueKey(label),
-                          style: const TextStyle(color: AppColors.saffron, fontSize: 12, fontWeight: FontWeight.w600),
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                    ],
-                    Text('region_title'.tr(),
-                        style: Theme.of(context)
-                            .textTheme
-                            .displayLarge
-                            ?.copyWith(color: AppColors.limestoneWhite, fontSize: 22)),
-                    const SizedBox(height: 4),
-                    Text(
-                      widget.count == null ? 'loading_places'.tr() : 'locations_available'.tr(namedArgs: {'count': widget.count.toString()}),
-                      style: const TextStyle(color: Color(0xFFC9C2AA), fontSize: 12),
-                    ),
-                  ],
-                ),
-                // Dot indicator so the rotation reads as an intentional
-                // carousel, not a flicker.
-                Row(
-                  children: List.generate(_slideCount, (i) {
-                    final active = i == index;
-                    return AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      margin: const EdgeInsets.only(left: 5),
-                      width: active ? 16 : 5,
-                      height: 5,
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
                       decoration: BoxDecoration(
-                        color: active ? AppColors.saffron : Colors.white.withValues(alpha: 0.35),
-                        borderRadius: BorderRadius.circular(3),
+                        color: Colors.black.withValues(alpha: .22),
+                        borderRadius: BorderRadius.circular(999),
+                        border: Border.all(color: Colors.white.withValues(alpha: .12)),
                       ),
-                    );
-                  }),
+                      child: Row(mainAxisSize: MainAxisSize.min, children: [
+                        const Icon(Icons.public_rounded, color: AppColors.saffron, size: 15),
+                        const SizedBox(width: 6),
+                        Text('app_slogan'.tr(), style: const TextStyle(color: AppColors.limestoneWhite, fontSize: 11, fontWeight: FontWeight.w700)),
+                      ]),
+                    ),
+                    Row(children: [
+                      _HeroIconButton(icon: Icons.emergency_outlined, onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const EmergencyScreen()))),
+                      const SizedBox(width: 6),
+                      _HeroIconButton(icon: Icons.notifications_outlined, onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const NotificationsScreen()))),
+                    ]),
+                  ],
                 ),
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  if (!useImages) ...[
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 500),
+                      child: Text(label.tr(), key: ValueKey(label), style: const TextStyle(color: AppColors.saffron, fontSize: 12, fontWeight: FontWeight.w700)),
+                    ),
+                    const SizedBox(height: 5),
+                  ],
+                  Text('region_title'.tr(), style: Theme.of(context).textTheme.displayLarge?.copyWith(color: AppColors.limestoneWhite, fontSize: 26, fontWeight: FontWeight.w900)),
+                  const SizedBox(height: 5),
+                  Text(widget.count == null ? 'loading_places'.tr() : 'locations_available'.tr(namedArgs: {'count': widget.count.toString()}), style: const TextStyle(color: Color(0xFFD5CEB9), fontSize: 12)),
+                ]),
+                Row(children: List.generate(_slideCount, (i) {
+                  final active = i == index;
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    margin: const EdgeInsets.only(left: 5),
+                    width: active ? 20 : 5,
+                    height: 5,
+                    decoration: BoxDecoration(color: active ? AppColors.saffron : Colors.white.withValues(alpha: 0.35), borderRadius: BorderRadius.circular(3)),
+                  );
+                })),
               ],
             ),
           ),
@@ -328,8 +367,23 @@ class _HeroState extends ConsumerState<_Hero> {
   }
 }
 
-/// Advertisements managed from the admin dashboard. Renders nothing when
-/// there is no active ad (or the backend is unreachable).
+class _HeroIconButton extends StatelessWidget {
+  const _HeroIconButton({required this.icon, required this.onTap});
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Material(
+        color: Colors.black.withValues(alpha: .22),
+        shape: const CircleBorder(),
+        child: InkWell(
+          onTap: onTap,
+          customBorder: const CircleBorder(),
+          child: Padding(padding: const EdgeInsets.all(9), child: Icon(icon, color: AppColors.limestoneWhite, size: 19)),
+        ),
+      );
+}
+
 class _AdBanner extends ConsumerWidget {
   const _AdBanner();
 
@@ -337,7 +391,7 @@ class _AdBanner extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final ads = ref.watch(adsProvider).value ?? const <AdItem>[];
     if (ads.isEmpty) return const SizedBox.shrink();
-    final screenWidth = MediaQuery.of(context).size.width;
+    final screenWidth = MediaQuery.sizeOf(context).width;
     final cardWidth = ads.length == 1 ? screenWidth - AppSpacing.lg * 2 : 280.0;
     return Padding(
       padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
@@ -379,23 +433,10 @@ class _AdCard extends StatelessWidget {
             fit: StackFit.expand,
             children: [
               if (ad.image.isNotEmpty)
-                CachedNetworkImage(
-                  imageUrl: ad.image,
-                  fit: BoxFit.cover,
-                  placeholder: (_, __) => const ColoredBox(color: AppColors.clay),
-                  errorWidget: (_, __, ___) => const ColoredBox(color: AppColors.clay),
-                )
+                CachedNetworkImage(imageUrl: ad.image, fit: BoxFit.cover, placeholder: (_, __) => const ColoredBox(color: AppColors.clay), errorWidget: (_, __, ___) => const ColoredBox(color: AppColors.clay))
               else
                 const ColoredBox(color: AppColors.clay),
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Colors.transparent, AppColors.ink.withValues(alpha: 0.8)],
-                  ),
-                ),
-              ),
+              DecoratedBox(decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.transparent, AppColors.ink.withValues(alpha: 0.8)]))),
               PositionedDirectional(
                 top: 8,
                 end: 8,
@@ -409,47 +450,14 @@ class _AdCard extends StatelessWidget {
                 start: 10,
                 end: 10,
                 bottom: 8,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      ad.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(color: AppColors.limestoneWhite, fontSize: 14, fontWeight: FontWeight.w700),
-                    ),
-                    if (ad.company.isNotEmpty)
-                      Text(
-                        ad.company,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(color: AppColors.limestoneWhite, fontSize: 11),
-                      ),
-                  ],
-                ),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
+                  Text(ad.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.limestoneWhite, fontSize: 14, fontWeight: FontWeight.w700)),
+                  if (ad.company.isNotEmpty) Text(ad.company, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.limestoneWhite, fontSize: 11)),
+                ]),
               ),
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _SearchField extends StatelessWidget {
-  const _SearchField({required this.onChanged});
-  final ValueChanged<String> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return TextField(
-      onChanged: onChanged,
-      decoration: InputDecoration(
-        hintText: 'search_hint'.tr(),
-        hintStyle: const TextStyle(color: AppColors.riverstone, fontSize: 13),
-        prefixIcon: const Icon(Icons.search_rounded, color: AppColors.riverstone, size: 20),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppSpacing.chipRadius)),
       ),
     );
   }
