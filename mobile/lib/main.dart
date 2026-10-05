@@ -5,15 +5,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/localization/ckb_localizations.dart';
 import 'core/theme/app_theme.dart';
+import 'core/services/supabase_service.dart';
 import 'features/settings/providers/settings_provider.dart';
 import 'features/splash/presentation/splash_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Keep the error surface language-neutral. Localized text is rendered
-  // after EasyLocalization is available; this global fallback must not leak
-  // Kurdish text into English or Arabic mode.
   ErrorWidget.builder = (FlutterErrorDetails details) => Container(
         color: const Color(0xFFFFF3F1),
         alignment: Alignment.center,
@@ -21,6 +19,8 @@ Future<void> main() async {
       );
 
   await EasyLocalization.ensureInitialized();
+  await SupabaseService.initialize();
+
   final prefs = await SharedPreferences.getInstance();
   final savedLanguage = prefs.getString('settings_language') ?? 'ckb';
   final initialLocale = Locale(savedLanguage);
@@ -29,7 +29,7 @@ Future<void> main() async {
     ProviderScope(
       child: EasyLocalization(
         supportedLocales: const [
-          Locale('ckb'), // Sorani Kurdish — default
+          Locale('ckb'),
           Locale('ar'),
           Locale('en'),
         ],
@@ -57,19 +57,12 @@ class KurdistanTourismApp extends ConsumerWidget {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: themeMode,
-      // ckb delegates first: Flutter has no built-in Sorani localizations,
-      // which caused "Null check operator used on a null value" in
-      // NavigationBar / TextField / AppBar.
       localizationsDelegates: [
         ...ckbLocalizationDelegates,
         ...context.localizationDelegates,
       ],
       supportedLocales: context.supportedLocales,
       locale: context.locale,
-      // Force RTL for Kurdish/Arabic explicitly — Flutter's built-in RTL
-      // locale table doesn't reliably include 'ckb' (Sorani Kurdish), so
-      // relying on automatic locale-based direction can silently render
-      // the whole app left-to-right.
       builder: (context, child) => Directionality(
         textDirection: context.locale.languageCode == 'en' ? TextDirection.ltr : TextDirection.rtl,
         child: child!,
