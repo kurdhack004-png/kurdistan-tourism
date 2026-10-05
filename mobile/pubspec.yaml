@@ -9,20 +9,21 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_localizations:          # Material/Widgets/Cupertino strings (ckb handled in core/localization)
+  flutter_localizations:
     sdk: flutter
   flutter_riverpod: ^2.5.1
-  dio: ^5.4.3                     # HTTP client
-  flutter_secure_storage: ^9.2.2  # secure token storage (not SharedPreferences)
-  shared_preferences: ^2.2.3      # small local flags + offline location cache (no codegen)
-  maplibre_gl: ^0.27.1            # open-source maps with offline tile support
-  geolocator: ^12.0.0             # GPS trail recording
-  easy_localization: ^3.0.8       # ckb/ar/en with RTL support
+  dio: ^5.4.3
+  flutter_secure_storage: ^9.2.2
+  shared_preferences: ^2.2.3
+  maplibre_gl: ^0.27.1
+  geolocator: ^12.0.0
+  easy_localization: ^3.0.8
   cached_network_image: ^3.3.1
-  url_launcher: ^6.3.0            # tel: links and opening the map app for directions
-  uuid: ^4.4.0                    # idempotency keys for payment requests
-  crypto: ^3.0.7                    # local demo-auth password hashing
-  file_picker: ^8.1.7                # admin media uploads
+  url_launcher: ^6.3.0
+  uuid: ^4.4.0
+  crypto: ^3.0.7
+  file_picker: ^8.1.7
+  supabase_flutter: ^2.9.1
 
 dev_dependencies:
   flutter_test:
