@@ -462,3 +462,31 @@ class _AdCard extends StatelessWidget {
     );
   }
 }
+
+class _SearchField extends StatelessWidget {
+  const _SearchField({required this.onChanged});
+
+  final ValueChanged<String> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      onChanged: onChanged,
+      decoration: InputDecoration(
+        hintText: 'search_hint'.tr(),
+        hintStyle: const TextStyle(
+          color: AppColors.riverstone,
+          fontSize: 13,
+        ),
+        prefixIcon: const Icon(
+          Icons.search_rounded,
+          color: AppColors.riverstone,
+          size: 20,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.chipRadius),
+        ),
+      ),
+    );
+  }
+}
